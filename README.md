@@ -29,6 +29,9 @@ mysql_database = "cs340_[ONID]"
 pip3 install -r requirements.txt
 ```
 
+### Ensure Data Is In Your MySQL Database
+- Navigate to DDL.SQL file in database directory and follow instructions there
+
 ### Running Program
 - In terminal enter the following, replacing port# with a number (e.g. 8000)
 ```bash
