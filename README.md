@@ -32,7 +32,7 @@ pip3 install -r requirements.txt
 ### Running Program
 - In terminal enter the following
 ```bash
-gunicorn --name OSUCourseTracker -b 0.0.0.0:7789 -D app:app
+gunicorn --name OSUCourseTracker -b 0.0.0.0:[port#] -D app:app
 ```
 - Note: providing a name (e.g. OSUCourseTracker) provides for an easier time when you want to stop the program
 - To stop the program enter the following
