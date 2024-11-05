@@ -32,10 +32,14 @@ def viewTerms():
   # Check DB connection and reconnect if needed
   mysql_connection = connectToDB()
 
+  # --------------
+  # TERM RETRIEVAL
+  # --------------
   # Retrieve all terms from 'Terms' table
   query = """
     SELECT *
     FROM Terms 
+    ORDER BY startDate ASC
   """
 
   # Execute query
@@ -46,7 +50,7 @@ def viewTerms():
   # Format terms to pass to template
   terms = [
     {
-      "termID": row[0],
+      "id": row[0],
       "name": row[1],
       "startDate": row[2],
       "endDate": row[3]
@@ -54,8 +58,35 @@ def viewTerms():
     for row in terms
   ]
 
-  return render_template("terms.j2", terms=terms)
+  # -----------------
+  # COURSES RETRIEVAL
+  # -----------------
+  # Retrieve all courses from 'Courses' table
+  query = """
+    SELECT 
+      CONCAT(code, ' ', name) AS course,
+      courseID
+    FROM Courses
+    ORDER BY code ASC
+  """
 
+  # Execute query
+  cursor = mysql_connection.cursor()
+  cursor.execute(query)
+  courses = cursor.fetchall()
+
+  # Format courses to pass to template
+  courses = [
+    {
+      "course": row[0],
+      "id": row[1]
+    }
+    for row in courses
+  ]
+
+  return render_template("terms.j2", terms=terms, courses=courses)
+
+@app.route("/add-term", methods=["POST"])
 def addTerm():
   pass
 
