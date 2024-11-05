@@ -114,12 +114,16 @@
 
   -- -----------------------------------------------------
   -- STUDENTS
-  -- Has ability to view all and also delete or update
+  -- Has ability to view all, add a student, and also delete or update
   -- -----------------------------------------------------
     -- SELECT all students
     SELECT *
     FROM Students
     ORDER BY lastName ASC;
+
+    -- INSERT new term
+    INSERT INTO Students (studentID, firstName, lastName)
+    VALUES (:studentID, :firstName, :lastName);
 
     -- DELETE student
     DELETE FROM Students
