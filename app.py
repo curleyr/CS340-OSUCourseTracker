@@ -7,6 +7,7 @@ app = Flask(__name__)
 # ///// #
 # INDEX #
 # ///// #
+@app.route("/", methods=["GET"])
 @app.route("/index", methods=["GET"])
 def index():
   return render_template("index.j2")
@@ -18,6 +19,8 @@ def index():
 def viewCourses():
   # Check DB connection and reconnect if needed
   mysql_connection = connectToDB()
+
+
   
   return render_template("courses.j2")
 
@@ -110,8 +113,33 @@ def addStudentTermPlan():
 def viewStudents():
   # Check DB connection and reconnect if needed
   mysql_connection = connectToDB()
-  
-  return render_template("students.j2")
+
+  # --------------
+  # STUDENTS RETRIEVAL
+  # --------------
+  # Retrieve all students from 'Students' table
+  query = """
+    SELECT *
+    FROM Students 
+    ORDER BY studentID ASC
+  """
+
+  # Execute query
+  cursor = mysql_connection.cursor()
+  cursor.execute(query)
+  students = cursor.fetchall()
+
+  # Format terms to pass to template
+  students = [
+    {
+      "id": row[0],
+      "firstName": row[1],
+      "lastName": row[2],
+    }
+    for row in students
+  ]
+
+  return render_template("students.j2", students=students)
 
 def addStudent():
   pass
@@ -127,7 +155,8 @@ if __name__ == "__main__":
   """
   * Terminal Commands *
   run: 
-    gunicorn --name OSUCourseTracker -b 0.0.0.0:7124 -D app:app
+    gunicorn --name OSUCourseTracker -b 0.0.0.0:7124 -D app:app (Bobby)
+    gunicorn --name OSUCourseTracker -b 0.0.0.0:23071 -D app:app (April)
   stop:
     pkill -f 'gunicorn --name OSUCourseTracker'
   """
