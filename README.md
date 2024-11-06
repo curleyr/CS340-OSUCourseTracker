@@ -52,18 +52,22 @@ pkill -f 'gunicorn --name OSUCourseTracker'
 ```
 
 # Git Team Workflow
+0. Select current branch aka source branch
+    ```sh
+    git checkout SourceName
+    ```
 1. Create Personal Branch off of current branch aka source branch (replace "BranchName" placeholder):
     ```sh
     git checkout -b BranchName
     ```
 2. Code
     - If you need to pull in changes from source branch (either main or another feature branch)
-    (Replace SourceBranch placeholder (e.g. main or feat/terms))
+    (Replace SourceName placeholder (e.g. main or feat/terms))
         ```sh
-        git checkout SourceBranch
+        git checkout SourceName
         git pull
         git checkout BranchName
-        git merge SourceBranch
+        git merge SourceName
         ```
 3. Commit changes using
     ```sh
@@ -75,9 +79,22 @@ pkill -f 'gunicorn --name OSUCourseTracker'
         ```sh
         git push -u origin BranchName
         ```
+        In CLI, this will print a message saying "Create a pull request for [...]" and provide a link. Command + Click that link to automatically generate pull request.
     - For subsequent pushes:
         ```sh
         git push
         ```
-5. Create Pull Request in Github website:
-- 
+5. Create Pull Request in Github website (by command clicking the link described in step 4):
+- Verify base that you want to merge into is correct
+- Add title and description if appropriate
+- Request reviewer on the right hand side
+- Click Create Pull Request
+6. If at the top of the PR, it does not say "Able to merge" in green with a check mark:
+- Do step 2
+
+## FOR REVIEWER OF PR:
+1. Open Pull request in github website
+2. Go to "Files Changed" tab
+3. Review code, click on line number to leave comment (you can click and drag to select multiple lines)
+4. Submit review comments
+5. Communicate with teammate
