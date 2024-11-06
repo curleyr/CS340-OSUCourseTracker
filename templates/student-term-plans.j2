@@ -4,6 +4,68 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Term Plans</title>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      
+      // //////// //
+      // FUNCTION //
+      // //////// //
+      // Handle toggling page from viewing student_term_plans to adding a student_term_plan and back
+      document.getElementById("add_student_term_plan_button").addEventListener("click", toggleStudentTermPlanForm);
+      document.getElementById("cancel_add_student_term_plan_button").addEventListener("click", toggleStudentTermPlanForm);
+      function toggleStudentTermPlanForm() {
+        const view_student_term_plans_section = document.getElementById("view_student_term_plans_section");
+        const add_student_term_plan_section = document.getElementById("add_student_term_plan_section");
+
+        if (view_student_term_plans_section.style.display === "block") {
+          view_student_term_plans_section.style.display = "none";
+          add_student_term_plan_section.style.display = "block";
+          
+        } else {
+          view_student_term_plans_section.style.display = "block";
+          add_student_term_plan_section.style.display = "none";
+        }
+      };
+
+      // //////// //
+      // FUNCTION //
+      // //////// //
+      // Handle add new student_term_plan form submission
+      document.getElementById("add_student_term_plan_form").onsubmit = addStudentTermPlan;
+      
+      async function addStudentTermPlan(event) {
+        // Prevent page from refreshing
+        event.preventDefault();
+
+        // Instantiate FormData object
+        const formData = new FormData(event.target);
+        // Initialize data object. This will be built below
+        const data = {};
+
+        // Iterate through each key value pair from formData
+        formData.forEach((value, key) => {
+          // Course ID array needs to be constructed
+          if (key === "student_term_plan_course_ids") {
+            // Create empty student_term_plan_course_ids array if not already included in data object
+            if (!data[key]) {
+              data[key] = [];
+            }
+            // Push student_term_plan ID to student_term_plan_course_ids array
+            data[key].push(value);
+          
+          // All non-student_term_plan keys can be pushed directly as separate data object properties
+          } else {
+            data[key] = value;
+          }
+        });
+        // Logging to console for debugging purposes
+        console.log(data);
+      };
+    });
+
+  </script>
+
 </head>
 <body>
 
@@ -13,6 +75,83 @@
 
   <main>
     <p><a href="/index">Back to index</a></p>
+
+    {# View All Course Section #}
+    <section id="view_student_term_plans_section" style="display: block;">
+      <h3>View All Sudent Term Plans</h3>
+      <button id="add_student_term_plan_button" type="button">Add New Student Term Plan</button>
+      <table>
+        <tr>
+          <th>Plan ID</th>
+          <th>Student ID</th>
+          <th>Student Name</th>
+          <th>Term</th>
+          <th>Courses</th>
+          <th>Advisor Approved</th>
+        </tr>
+        {% for student_term_plan in student_term_plans %}
+          <tr>
+            <td>{{ student_term_plan["studentTermPlanID"] }}</td>
+            <td>{{ student_term_plan["studentID"] }}</td>
+            <td>{{ student_term_plan["studentName"] }}</td>
+            <td>{{ student_term_plan["termName"] }}</td>
+            <td>{{ student_term_plan["courses"] }}</td>
+            <td>{{ student_term_plan["advisorApproved"] }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </section>
+
+    {# Add New Term Plan Section #}
+    <section id="add_student_term_plan_section" style="display: none;">
+      <h3>Add New Student Term Plan</h3>
+      <form id="add_student_term_plan_form"> 
+        
+        {# Student #}
+        <label for="student_term_plan_student">Student</label><br>
+        <select name="student_term_plan_student" id="student_term_plan_student" aria-label="Student" required>
+          <option value="" disabled selected>Select a student</option>
+
+        {% for student in students %}
+            <option value={{ student["studentID"] }}>{{ student["student"] }}</option>
+        {% endfor %}
+        
+        </select><br>
+
+        {# Term #}
+        <label for="student_term_plan_term">Term</label><br>
+        <select name="student_term_plan_term" id="student_term_plan_term" aria-label="Term" required>
+          <option value="" disabled selected>Select a term</option>
+
+        {% for term in terms %}
+            <option value={{ term["termID"] }}>{{ term["name"] }}</option>
+        {% endfor %}
+        
+        </select><br>
+
+        {# Advisor Approved #}
+        <p>Advisor Approved</p>
+        <label>
+          <input type="radio" name="student_term_plan_advisor_approved" value=1>Yes
+        </label><br>
+        <label>
+          <input type="radio" name="student_term_plan_advisor_approved" value=0>No
+        </label><br>
+
+        {# Courses #}
+        <p>Courses</p>
+        {% for course in courses %}
+          <label>
+            <input type="checkbox" name="student_term_plan_course_ids" value={{ course["courseID"] }}> {{ course["course"] }}
+          </label><br>
+        {% endfor %}
+
+        {# Submit and Cancel Buttons #}
+        <button id="submit_add_student_term_plan_button" type="submit">Submit</button><br>
+        <button id="cancel_add_student_term_plan_button" type="button">Cancel</button>
+       </form>
+    </section>
+  
   </main>
 
 </body>
