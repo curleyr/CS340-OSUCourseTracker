@@ -126,6 +126,14 @@
     INSERT INTO StudentTermPlans_has_Courses (studentTermPlanID, courseID)
     VALUES ((SELECT studentTermPlanID FROM StudentTermPlans WHERE studentID = :studentID_From_Dropdown_Input AND termID = :termID_From_Dropdown_Input), :courseID_From_Checkbox_Input);
 
+    -- For Updating row of StudentTermPlans_has_Courses (courseID can be updated to NULL)
+    UPDATE  StudentTermPlans_has_Courses (studentTermPlanCourseID, courseID)
+    SET courseID = :courseID_from_Dropdown_input
+    WHERE studentTermPlanCourseID = :studentTermPlanCourseID_passed_into_update_component ;
+
+    -- For Deleting row of StudentTermPlans_has_Courses
+    DELETE FROM StudentTermPlans_has_Courses
+    WHERE studentTermPlanCourseID = :studentTermPlanCourseID_passed_into_delete_component ;
   -- -----------------------------------------------------
   -- STUDENTS
   -- Has ability to view all, add a student, and also delete or update
