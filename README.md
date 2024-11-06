@@ -50,3 +50,34 @@ gunicorn --name OSUCourseTracker -b 0.0.0.0:port# -D app:app
 ```bash
 pkill -f 'gunicorn --name OSUCourseTracker'
 ```
+
+# Git Team Workflow
+1. Create Personal Branch off of current branch aka source branch (replace "BranchName" placeholder):
+    ```sh
+    git checkout -b BranchName
+    ```
+2. Code
+    - If you need to pull in changes from source branch (either main or another feature branch)
+    (Replace SourceBranch placeholder (e.g. main or feat/terms))
+        ```sh
+        git checkout SourceBranch
+        git pull
+        git checkout BranchName
+        git merge SourceBranch
+        ```
+3. Commit changes using
+    ```sh
+    git add .
+    git commit -m "change message"
+    ```
+4. Push changes to remote repository
+    - (FOR FIRST TIME ON BRANCH) Push your local branch to remote repository 
+        ```sh
+        git push -u origin BranchName
+        ```
+    - For subsequent pushes:
+        ```sh
+        git push
+        ```
+5. Create Pull Request in Github website:
+- 
