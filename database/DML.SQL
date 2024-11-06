@@ -60,8 +60,20 @@
     ORDER BY startDate ASC;
 
     -- INSERT new term
+    -- First need query to retrieve all courses to formulate courses checkboxes on form
+    SELECT 
+      CONCAT(code, ' ', name) AS course,
+      courseID
+    FROM Courses
+    ORDER BY code ASC;
+
+    -- Then can insert term when form is submitted  
     INSERT INTO Terms (name, startDate, endDate)
     VALUES (:nameInput, :startDate_From_Date_Input, :endDate_From_Date_Input);
+
+    -- Then can insert into Terms_has_Courses for each course checkbox submitted on form
+    INSERT INTO Terms_has_Courses (termID, courseID)
+    VALUES ((SELECT termID FROM Terms WHERE name = :nameInput), :courseID_From_Checkbox_Input);
 
   -- -----------------------------------------------------
   -- STUDENT TERM PLANS
@@ -73,19 +85,21 @@
     SELECT 
       stp.studentTermPlanID, 
       stp.studentID, 
-      t.name, 
+      CONCAT(s.firstName, ' ', s.lastName) AS studentName,
+      t.name AS termName, 
       GROUP_CONCAT((SELECT CONCAT(code, ' ', name) FROM Courses WHERE courseID = stpc.courseID) ORDER BY stpc.courseID ASC SEPARATOR ', ') AS courses,
-      stp.advisorApproved
+      CASE WHEN stp.advisorApproved = 1 THEN 'Yes' ELSE 'No' End AS advisorApproved
     FROM StudentTermPlans stp
     INNER JOIN Terms t ON stp.termID = t.termID
+	  INNER JOIN Students s ON s.studentID = stp.studentID
     INNER JOIN StudentTermPlans_has_Courses stpc ON stp.studentTermPlanID = stpc.studentTermPlanID
     GROUP BY stp.studentTermPlanID
-    ORDER BY stp.studentTermPlanID ASC;
+    ORDER BY stp.studentTermPlanID ASC
 
     -- INSERT new plan
     -- First need query to retrieve all students to use in dropdown on form
     SELECT 
-      CONCAT(lastName, ', ', firstName, ' - ', studentID) AS Student,
+      CONCAT(lastName, ', ', firstName, ' - ', studentID) AS student,
       studentID
     FROM Students
     ORDER BY lastName ASC;
@@ -99,7 +113,7 @@
       
     -- Then need query to retrieve all courses to formulate courses checkboxes on form
     SELECT 
-      CONCAT(code, ' ', name) AS Course,
+      CONCAT(code, ' ', name) AS course,
       courseID
     FROM Courses
     ORDER BY code ASC;
@@ -121,7 +135,7 @@
     FROM Students
     ORDER BY lastName ASC;
 
-    -- INSERT new term
+    -- INSERT new student
     INSERT INTO Students (studentID, firstName, lastName)
     VALUES (:studentID, :firstName, :lastName);
 
