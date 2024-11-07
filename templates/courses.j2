@@ -84,14 +84,14 @@
       <button id="add_course_button" type="button">Add New Course</button>
       <table>
         <tr>
-          {# <th>ID</th> #}
+          <th>ID</th>
           <th>Course</th>
           <th>Credit</th>
           <th>Prerequisites</th>
         </tr>
         {% for course in courses %}
         <tr>
-          {# <td>{{ course["id"] }}</td> #}
+          <td>{{ course["id"] }}</td>
           <td>{{ course["course"] }}</td>
           <td>{{ course["credit"] }}</td>
           <td>{{ course["prerequisites"] }}</td>

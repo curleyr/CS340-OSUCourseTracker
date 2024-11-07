@@ -77,6 +77,7 @@
   -- -----------------------------------------------------
     -- SELECT all plans
     SELECT 
+      stp.studentTermPlanID,
       stp.studentID, 
       CONCAT(s.firstName, ' ', s.lastName) AS studentName,
       t.name AS termName, 
