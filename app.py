@@ -140,6 +140,7 @@ def viewStudentTermPlans():
   # Retrieve all term plans from 'StudentTermPlans' table
   query = """
     SELECT
+      stp.studentTermPlanID,
       stp.studentID, 
       CONCAT(s.firstName, ' ', s.lastName) as studentName,
       t.name as termName, 
@@ -161,11 +162,12 @@ def viewStudentTermPlans():
   # Format student term plans to pass to template
   student_term_plans = [
     {
-      "studentID": row[0],
-      "studentName": row[1],
-      "termName": row[2],
-      "courses": row[3],
-      "advisorApproved": row[4]
+      "studentTermPlanID": row[0],
+      "studentID": row[1],
+      "studentName": row[2],
+      "termName": row[3],
+      "courses": row[4],
+      "advisorApproved": row[5]
     }
     for row in student_term_plans
   ]
