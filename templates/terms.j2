@@ -84,14 +84,12 @@
       <button id="add_term_button" type="button">Add New Term</button>
       <table>
         <tr>
-          {# <th>ID</th> #}
           <th>Name</th>
           <th>Start Date</th>
           <th>End Date</th>
         </tr>
         {% for term in terms %}
         <tr>
-          {# <td>{{ term["id"] }}</td> #}
           <td>{{ term["name"] }}</td>
           <td>{{ term["startDate"] }}</td>
           <td>{{ term["endDate"] }}</td>

@@ -16,7 +16,7 @@
   -- -----------------------------------------------------
   -- COURSES & PREREQUISITES PAGE
   -- This page combines data from the Courses Table and 
-  -- Prerequisites table.
+  -- Courses_has_Prerequisites table.
   -- Has ability to view all and also add new course
   -- -----------------------------------------------------
 
@@ -28,7 +28,7 @@
       c.credit,  
       GROUP_CONCAT((SELECT CONCAT(code, ' ', name) FROM Courses WHERE courseID = pc.courseID) ORDER BY pc.courseID SEPARATOR ', ') AS prerequisites 
       FROM Courses c 
-    LEFT JOIN Prerequisites p   
+    LEFT JOIN Courses_has_Prerequisites p   
       ON c.courseID = p.courseID 
     LEFT JOIN Courses pc  
       ON p.prerequisiteCourseID = pc.courseID 
@@ -36,18 +36,12 @@
     ORDER BY c.code ASC;
 
     -- INSERT new course
-    -- First need query to retrieve all courses to formulate prerequisite checkboxes on form
-    SELECT 
-      CONCAT(code, ' ', name) AS Prerequisite
-    FROM Courses
-    ORDER BY code ASC;
-
-    -- Then can insert course when form is submitted
+    -- First can insert course when form is submitted
     INSERT INTO Courses (code, name, credit)
     VALUES (:codeInput, :nameInput, :creditInput);
 
     -- Then can also insert prerequisite for each prerequisite checkbox submitted on form
-    INSERT INTO Prerequisites (courseID, prerequisiteCourseID)
+    INSERT INTO Courses_has_Prerequisites (courseID, prerequisiteCourseID)
     VALUES ((SELECT courseID FROM Courses WHERE name = :nameInput), :prerequisiteCourseID_From_Checkbox_Input);
 
   -- -----------------------------------------------------
@@ -83,7 +77,6 @@
   -- -----------------------------------------------------
     -- SELECT all plans
     SELECT 
-      stp.studentTermPlanID, 
       stp.studentID, 
       CONCAT(s.firstName, ' ', s.lastName) AS studentName,
       t.name AS termName, 
@@ -129,11 +122,12 @@
     -- For Updating row of StudentTermPlans_has_Courses (courseID can be updated to NULL)
     UPDATE  StudentTermPlans_has_Courses (studentTermPlanCourseID, courseID)
     SET courseID = :courseID_from_Dropdown_input
-    WHERE studentTermPlanCourseID = :studentTermPlanCourseID_passed_into_update_component ;
+    WHERE studentTermPlanCourseID = :studentTermPlanCourseID_passed_into_update_component;
 
     -- For Deleting row of StudentTermPlans_has_Courses
     DELETE FROM StudentTermPlans_has_Courses
-    WHERE studentTermPlanCourseID = :studentTermPlanCourseID_passed_into_delete_component ;
+    WHERE studentTermPlanCourseID = :studentTermPlanCourseID_passed_into_delete_component;
+
   -- -----------------------------------------------------
   -- STUDENTS
   -- Has ability to view all, add a student, and also delete or update
