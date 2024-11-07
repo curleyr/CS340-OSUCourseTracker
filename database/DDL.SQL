@@ -126,22 +126,23 @@ VALUES
   ('000000002', (SELECT termID FROM Terms WHERE name='Summer 2024'), 0);
 
 -- -----------------------------------------------------
--- Create 'Prerequisites' Linking Table
+-- Create 'Courses_has_Prerequisites' Linking Table
 -- -----------------------------------------------------
-CREATE OR REPLACE TABLE Prerequisites (
+CREATE OR REPLACE TABLE Courses_has_Prerequisites (
+  coursePrerequisiteID INT NOT NULL AUTO_INCREMENT,
   courseID INT NOT NULL,
-  prerequisiteCourseID INT NOT NULL,
-  PRIMARY KEY (courseID, prerequisiteCourseID),
+  prerequisiteID INT NOT NULL,
+  PRIMARY KEY (coursePrerequisiteID),
   FOREIGN KEY (courseID) REFERENCES Courses (courseID) ON DELETE CASCADE,
-  FOREIGN KEY (prerequisiteCourseID) REFERENCES Courses (courseID) ON DELETE CASCADE
+  FOREIGN KEY (prerequisiteID) REFERENCES Courses (courseID) ON DELETE CASCADE
 );
 
 -- -----------------------------------------------------
--- Insert Data Into 'Prerequisites' Linking Table
+-- Insert Data Into 'Courses_has_Prerequisites' Linking Table
 -- -----------------------------------------------------
-INSERT INTO Prerequisites (
+INSERT INTO Courses_has_Prerequisites (
   courseID,
-  prerequisiteCourseID
+  prerequisiteID
 )
 VALUES
   ((SELECT courseID FROM Courses WHERE code='CS162'), (SELECT courseID FROM Courses WHERE code='CS161')),
@@ -153,9 +154,10 @@ VALUES
 -- Create 'StudentTermPlans_has_Courses' Linking Table
 -- -----------------------------------------------------
 CREATE OR REPLACE TABLE StudentTermPlans_has_Courses (
+  studentTermPlanCourseID INT NOT NULL AUTO_INCREMENT,
   studentTermPlanID INT NOT NULL,
-  courseID INT NOT NULL,
-  PRIMARY KEY (studentTermPlanID, courseID),
+  courseID INT,
+  PRIMARY KEY (studentTermPlanCourseID),
   FOREIGN KEY (studentTermPlanID) REFERENCES StudentTermPlans (studentTermPlanID) ON DELETE CASCADE,
   FOREIGN KEY (courseID) REFERENCES Courses (courseID) ON DELETE CASCADE
 );
@@ -179,9 +181,10 @@ VALUES
 -- Create 'Terms_has_Courses' Linking Table
 -- -----------------------------------------------------
 CREATE OR REPLACE TABLE Terms_has_Courses (
+  termCourseID INT NOT NULL AUTO_INCREMENT,
   termID INT NOT NULL,
   courseID INT NOT NULL,
-  PRIMARY KEY (termID, courseID),
+  PRIMARY KEY (termCourseID),
   FOREIGN KEY (termID) REFERENCES Terms (termID) ON DELETE CASCADE,
   FOREIGN KEY (courseID) REFERENCES Courses (courseID) ON DELETE CASCADE
 );
