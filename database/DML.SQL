@@ -44,14 +44,20 @@
     INSERT INTO Courses_has_Prerequisites (courseID, prerequisiteCourseID)
     VALUES ((SELECT courseID FROM Courses WHERE name = :nameInput), :prerequisiteCourseID_From_Checkbox_Input);
 
-  -- -----------------------------------------------------
+  -- ---------------------------------------------------------
   -- TERMS PAGE
   -- Has ability to view all and also add new term
-  -- -----------------------------------------------------
+  -- This page combines data from terms and Terms_has_courses
+  -- ---------------------------------------------------------
     -- SELECT all terms
-    SELECT * 
-    FROM Terms 
-    ORDER BY startDate ASC;
+    SELECT 
+      t.*, 
+      GROUP_CONCAT(CONCAT(c.code, ' ', c.name) ORDER BY c.courseID ASC SEPARATOR ', ') AS courses
+    FROM Terms t
+    INNER JOIN Terms_has_Courses thc ON t.termID = thc.termID
+    INNER JOIN Courses c ON thc.courseID = c.courseID
+    GROUP BY t.termID
+    ORDER BY t.startDate ASC;
 
     -- INSERT new term
     -- First need query to retrieve all courses to formulate courses checkboxes on form

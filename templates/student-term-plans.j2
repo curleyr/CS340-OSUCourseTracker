@@ -6,6 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Term Plans</title>
 
+  {# Favicon #}
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" />
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}" />
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}" />  
+  <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}" />
+
   <script>
     document.addEventListener("DOMContentLoaded", function () {
 
@@ -13,7 +20,8 @@
       // FUNCTION //
       // //////// //
       // Handle toggling page from viewing student_term_plans to adding a student_term_plan and back
-      document.getElementById("add_student_term_plan_button").addEventListener("click", toggleStudentTermPlanForm);
+      //TODO uncomment line below for final submission 
+      //document.getElementById("add_student_term_plan_button").addEventListener("click", toggleStudentTermPlanForm);
       document.getElementById("cancel_add_student_term_plan_button").addEventListener("click", toggleStudentTermPlanForm);
       function toggleStudentTermPlanForm() {
         const view_student_term_plans_section = document.getElementById("view_student_term_plans_section");
@@ -75,14 +83,24 @@
     <h1>Student Term Plans</h1>
   </header>
 
+  {# Navigation Bar #}
+  <nav>
+    <ul>
+      <li><a href="/index">Index</a></li>
+      <li><a href="/courses">Courses & Prerequisites</a></li>
+      <li><a href="/terms">Terms</a></li>
+      <li><a href="/student-term-plans">Student Term Plans</a></li>
+      <li><a href="/students">Students</a></li>
+    </ul>
+  </nav>
+
   <main>
-    <p><a href="/index">Back to index</a></p>
 
     {# View All Course Section #}
     <section id="view_student_term_plans_section" style="display: block;">
       <h3>View All Student Term Plans</h3>
       <button id="add_student_term_plan_button" type="button">Add New Student Term Plan</button>
-      <table>
+      <table border="1">
         <tr>
           <th>Plan ID</th>
           <th>Student ID</th>
@@ -98,7 +116,13 @@
           <td>{{ student_term_plan["studentID"] }}</td>
           <td>{{ student_term_plan["studentName"] }}</td>
           <td>{{ student_term_plan["termName"] }}</td>
-          <td>{{ student_term_plan["courses"] }}</td>
+          <td>
+            {% if student_term_plan["courses"] %}
+              {{ student_term_plan["courses"].replace(', ', ', <br>')|safe }}
+            {% else %}
+              None
+            {% endif %}
+          </td>
           <td>{{ student_term_plan["advisorApproved"] }}</td>
           {# TODO: Add functionality to this button #}
           <td><button id="edit_student_term_plan_courses_button" type="button">Edit</button></td>
@@ -108,9 +132,10 @@
     </section>
 
     {# Add New Term Plan Section #}
-    <section id="add_student_term_plan_section" style="display: none;">
+    {# TODO uncomment this line and delete line below for final submission <section id="add_student_term_plan_section" style="display: none;"> #}
+    <hr><section id="add_student_term_plan_section" style="display: block;">
       <h3>Add New Student Term Plan</h3>
-      <form id="add_student_term_plan_form">
+      <form id="add_student_term_plan_form" style="border: 1px solid black; padding: 15px;">
 
         {# Student #}
         <label for="student_term_plan_student">Student</label><br>
@@ -159,11 +184,12 @@
     </section>
 
     {# Update or Delete Student's Courses in Student Term Plan #}
-    <section id="edit_student_term_plan_courses_section">
+    {# TODO remove temp <hr> tag below once form is dynamically shown for final submission #}
+    <hr><section id="edit_student_term_plan_courses_section">
       <h3>Update or Delete Student Term Plan's Courses</h3>
       <p>April Wang's Spring 2024 Term</p>
       <button id="cancel_edit_student_term_plan_courses_section" type="button">Cancel</button>
-      <table>
+      <table border="1">
         <tr>
           <th>Course</th>
           <th>Update</th>

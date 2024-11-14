@@ -6,6 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Courses</title>
 
+  {# Favicon #}
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" />
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}" />
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}" />  
+  <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}" />
+
   <script>
     document.addEventListener("DOMContentLoaded", function () {
 
@@ -13,7 +20,8 @@
       // FUNCTION //
       // //////// //
       // Handle toggling page from viewing courses to adding a course and back
-      document.getElementById("add_course_button").addEventListener("click", toggleCourseForm);
+      //TODO uncomment line below for final submission 
+      //document.getElementById("add_course_button").addEventListener("click", toggleCourseForm);
       document.getElementById("cancel_add_course_button").addEventListener("click", toggleCourseForm);
       function toggleCourseForm() {
         const view_courses_section = document.getElementById("view_courses_section");
@@ -75,14 +83,24 @@
     <h1>Courses</h1>
   </header>
 
+  {# Navigation Bar #}
+  <nav>
+    <ul>
+      <li><a href="/index">Index</a></li>
+      <li><a href="/courses">Courses & Prerequisites</a></li>
+      <li><a href="/terms">Terms</a></li>
+      <li><a href="/student-term-plans">Student Term Plans</a></li>
+      <li><a href="/students">Students</a></li>
+    </ul>
+  </nav>
+
   <main>
-    <p><a href="/index">Back to index</a></p>
 
     {# View All Course Section #}
     <section id="view_courses_section" style="display: block;">
       <h3>View All Courses & Prerequisites</h3>
       <button id="add_course_button" type="button">Add New Course</button>
-      <table>
+      <table border="1">
         <tr>
           <th>ID</th>
           <th>Course</th>
@@ -94,16 +112,23 @@
           <td>{{ course["id"] }}</td>
           <td>{{ course["course"] }}</td>
           <td>{{ course["credit"] }}</td>
-          <td>{{ course["prerequisites"] }}</td>
+          <td>
+            {% if course["prerequisites"] %}
+              {{ course["prerequisites"].replace(', ', ', <br>')|safe }}
+            {% else %}
+              None
+            {% endif %}
+          </td>
         </tr>
         {% endfor %}
       </table>
     </section>
 
     {# Add New Course Section #}
-    <section id="add_course_section" style="display: none;">
+    {# TODO uncomment this line and delete line below for final submission <section id="add_course_section" style="display: none;"> #}
+    <hr><section id="add_course_section">
       <h3>Add New Course</h3>
-      <form id="add_course_form">
+      <form id="add_course_form" style="border: 1px solid black; padding: 15px;">
         {# Course Code #}
         <label for="course_code">Code</label><br>
         <input type="text" id="course_code" name="course_code" aria-label="Code" required /><br>

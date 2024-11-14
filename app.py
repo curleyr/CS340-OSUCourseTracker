@@ -73,9 +73,14 @@ def viewTerms():
   # --------------
   # Retrieve all terms from 'Terms' table
   query = """
-    SELECT *
-    FROM Terms 
-    ORDER BY startDate ASC
+    SELECT 
+      t.*, 
+      GROUP_CONCAT(CONCAT(c.code, ' ', c.name) ORDER BY c.courseID ASC SEPARATOR ', ') AS courses
+    FROM Terms t
+    INNER JOIN Terms_has_Courses thc ON t.termID = thc.termID
+    INNER JOIN Courses c ON thc.courseID = c.courseID
+    GROUP BY t.termID
+    ORDER BY t.startDate ASC;
   """
 
   # Execute query
@@ -89,7 +94,8 @@ def viewTerms():
       "id": row[0],
       "name": row[1],
       "startDate": row[2],
-      "endDate": row[3]
+      "endDate": row[3],
+      "courses": row[4]
     }
     for row in terms
   ]

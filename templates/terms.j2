@@ -6,6 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terms</title>
 
+  {# Favicon #}
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" />
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}" />
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}" />  
+  <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}" />
+
   <script>
     document.addEventListener("DOMContentLoaded", function () {
 
@@ -13,7 +20,8 @@
       // FUNCTION //
       // //////// //
       // Handle toggling page from viewing terms to adding a term and back
-      document.getElementById("add_term_button").addEventListener("click", toggleTermForm);
+      //TODO uncomment line below for final submission 
+      //document.getElementById("add_term_button").addEventListener("click", toggleTermForm);
       document.getElementById("cancel_add_term_button").addEventListener("click", toggleTermForm);
       function toggleTermForm() {
         const view_terms_section = document.getElementById("view_terms_section");
@@ -75,19 +83,30 @@
     <h1>Terms</h1>
   </header>
 
+  {# Navigation Bar #}
+  <nav>
+    <ul>
+      <li><a href="/index">Index</a></li>
+      <li><a href="/courses">Courses & Prerequisites</a></li>
+      <li><a href="/terms">Terms</a></li>
+      <li><a href="/student-term-plans">Student Term Plans</a></li>
+      <li><a href="/students">Students</a></li>
+    </ul>
+  </nav>
+
   <main>
-    <p><a href="/index">Back to index</a></p>
 
     {# View All Terms Section #}
     <section id="view_terms_section" style="display: block;">
       <h3>View All Terms</h3>
       <button id="add_term_button" type="button">Add New Term</button>
-      <table>
+      <table border="1">
         <tr>
           <th>ID</th>
           <th>Name</th>
           <th>Start Date</th>
           <th>End Date</th>
+          <th>Courses</th>
         </tr>
         {% for term in terms %}
         <tr>
@@ -95,15 +114,23 @@
           <td>{{ term["name"] }}</td>
           <td>{{ term["startDate"] }}</td>
           <td>{{ term["endDate"] }}</td>
+          <td>
+            {% if term["courses"] %}
+              {{ term["courses"].replace(', ', ', <br>')|safe }}
+            {% else %}
+              None
+            {% endif %}
+          </td>
         </tr>
         {% endfor %}
       </table>
     </section>
 
     {# Add New Term Section #}
-    <section id="add_term_section" style="display: none;">
+    {# TODO uncomment this line and delete line below for final submission <section id="add_term_section" style="display: none;"> #}
+    <hr><section id="add_term_section" style="display: block;">
       <h3>Add New Term</h3>
-      <form id="add_term_form">
+      <form id="add_term_form" style="border: 1px solid black; padding: 15px;">
         {# Term Season #}
         <label for="term_season">Term Season</label><br>
         <select name="term_season" id="term_season" aria-label="Term Season" required>

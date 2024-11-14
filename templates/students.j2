@@ -5,6 +5,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Students</title>
+
+  {# Favicon #}
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" />
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}" />
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}" />  
+  <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}" />
+
 </head>
 
 <body>
@@ -13,14 +21,24 @@
     <h1>Students</h1>
   </header>
 
+  {# Navigation Bar #}
+  <nav>
+    <ul>
+      <li><a href="/index">Index</a></li>
+      <li><a href="/courses">Courses & Prerequisites</a></li>
+      <li><a href="/terms">Terms</a></li>
+      <li><a href="/student-term-plans">Student Term Plans</a></li>
+      <li><a href="/students">Students</a></li>
+    </ul>
+  </nav>
+
   <main>
-    <p><a href="/index">Back to index</a></p>
 
     {# View All Students Section #}
     <section id="view_students_section">
       <h3>View All Students</h3>
       <button ID="add_students_button" type="button">Add New Student</button>
-      <table>
+      <table border="1">
         <tr>
           <th>OSU ID Number</th>
           <th>First Name</th>
@@ -41,9 +59,10 @@
     </section>
 
     {# Add New Student Section #}
-    <section id="add_student_section">
+    {# TODO remove temp <hr> tag below once form is dynamically shown for final submission #}
+    <hr><section id="add_student_section">
       <h3>Add New Student</h3>
-      <form id="add_student_form">
+      <form id="add_student_form" style="border: 1px solid black; padding: 15px;">
         {# Student OSU ID Number #}
         <label for="student_id">OSU ID Number:</label>
         <input type="text" inputmode="numeric" name="student_id" id="student_id" aria-label="Student OSU ID Number"
@@ -62,10 +81,11 @@
     </section>
 
     {# Update/Edit Student Section #}
-    <section id="edit_student_section">
+    {# TODO remove temp <hr> tag below once form is dynamically shown for final submission #}
+    <hr><section id="edit_student_section">
       <h3>Edit Student Information</h3>
       {# TODO: Make this dynamically show the student being edited. This is currently hard coded #}
-      <form id="edit_student_form">
+      <form id="edit_student_form" style="border: 1px solid black; padding: 15px;">
         {# Student First Name #}
         <label for="first_name">First Name</label>
         <input type="text" name="first_name" id="first_name" aria-label="Student First Name" required value="April">
@@ -80,9 +100,10 @@
       </form>
 
       {# Delete Student Section #}
-      <section id="delete_student_section">
+      {# TODO remove temp <hr> tag below once form is dynamically shown for final submission #}
+      <hr><section id="delete_student_section">
         <h3>Delete Student from Database</h3>
-        <form id="delete_student_form">
+        <form id="delete_student_form" style="border: 1px solid black; padding: 15px;">
           <p>Are you sure you want to delete the following student?</p>
           {# TODO: Make this dynamically show the student being deleted. This is currently hard coded #}
           <p>April Wang</p>
