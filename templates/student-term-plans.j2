@@ -116,7 +116,13 @@
           <td>{{ student_term_plan["studentID"] }}</td>
           <td>{{ student_term_plan["studentName"] }}</td>
           <td>{{ student_term_plan["termName"] }}</td>
-          <td>{{ student_term_plan["courses"].replace(', ', ', <br>')|safe }}</td>
+          <td>
+            {% if student_term_plan["courses"] %}
+              {{ student_term_plan["courses"].replace(', ', ', <br>')|safe }}
+            {% else %}
+              None
+            {% endif %}
+          </td>
           <td>{{ student_term_plan["advisorApproved"] }}</td>
           {# TODO: Add functionality to this button #}
           <td><button id="edit_student_term_plan_courses_button" type="button">Edit</button></td>

@@ -112,7 +112,13 @@
           <td>{{ course["id"] }}</td>
           <td>{{ course["course"] }}</td>
           <td>{{ course["credit"] }}</td>
-          <td>{{ course["prerequisites"].replace(', ', ', <br>')|safe }}</td>
+          <td>
+            {% if course["prerequisites"] %}
+              {{ course["prerequisites"].replace(', ', ', <br>')|safe }}
+            {% else %}
+              None
+            {% endif %}
+          </td>
         </tr>
         {% endfor %}
       </table>

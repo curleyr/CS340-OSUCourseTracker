@@ -114,7 +114,13 @@
           <td>{{ term["name"] }}</td>
           <td>{{ term["startDate"] }}</td>
           <td>{{ term["endDate"] }}</td>
-          <td>{{ term["courses"].replace(', ', ', <br>')|safe }}</td>
+          <td>
+            {% if term["courses"] %}
+              {{ term["courses"].replace(', ', ', <br>')|safe }}
+            {% else %}
+              None
+            {% endif %}
+          </td>
         </tr>
         {% endfor %}
       </table>
