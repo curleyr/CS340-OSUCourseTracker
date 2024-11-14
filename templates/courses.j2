@@ -100,7 +100,7 @@
     <section id="view_courses_section" style="display: block;">
       <h3>View All Courses & Prerequisites</h3>
       {# TODO uncomment this line for final submission <button id="add_course_button" type="button">Add New Course</button> #}
-      <table>
+      <table border="1">
         <tr>
           <th>ID</th>
           <th>Course</th>
@@ -126,9 +126,9 @@
 
     {# Add New Course Section #}
     {# TODO uncomment this line and delete line below for final submission <section id="add_course_section" style="display: none;"> #}
-    <hr><section id="add_course_section" style="display: block;">
+    <hr><section id="add_course_section">
       <h3>Add New Course</h3>
-      <form id="add_course_form">
+      <form id="add_course_form" style="border: 1px solid black; padding: 15px;">
         {# Course Code #}
         <label for="course_code">Code</label><br>
         <input type="text" id="course_code" name="course_code" aria-label="Code" required /><br>
