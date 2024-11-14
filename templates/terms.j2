@@ -106,6 +106,7 @@
           <th>Name</th>
           <th>Start Date</th>
           <th>End Date</th>
+          <th>Courses</th>
         </tr>
         {% for term in terms %}
         <tr>
@@ -113,6 +114,7 @@
           <td>{{ term["name"] }}</td>
           <td>{{ term["startDate"] }}</td>
           <td>{{ term["endDate"] }}</td>
+          <td>{{ term["courses"].replace(', ', ', <br>')|safe }}</td>
         </tr>
         {% endfor %}
       </table>
