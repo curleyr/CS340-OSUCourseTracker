@@ -384,12 +384,9 @@ def editStudentTermPlan():
   except Exception as error:
     return jsonify(message = f"The following error has occurred: {str(error)}"), 500
 
-@app.route("/delete-student-term-plan/<int:student_term_plan_course_id>", methods=["DELETE"])
-def deleteStudentTermPlan(student_term_plan_course_id):
-  try:
-    if not student_term_plan_course_id:
-      return jsonify(message = "Not all required attributes were provided in the request"), 400
-    
+@app.route("/delete-student-term-plan-course/<int:student_term_plan_course_id>", methods=["DELETE"])
+def deleteStudentTermPlanCourse(student_term_plan_course_id):
+  try:    
     # Check DB connection and reconnect if needed
     mysql_connection = connectToDB()
 
@@ -403,6 +400,9 @@ def deleteStudentTermPlan(student_term_plan_course_id):
       cursor = mysql_connection.cursor()
       cursor.execute(query, (student_term_plan_course_id,))
       mysql_connection.commit()
+
+      if cursor.rowcount == 0:
+        return jsonify(message = "No course found with the provided ID."), 404
 
       return jsonify(message = "The student course plan has been deleted."), 200
 
