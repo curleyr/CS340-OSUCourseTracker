@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, session, redirect
+from flask import Flask, request, jsonify, render_template, session, redirect, abort
 from database.db_config import connectToDB
 import MySQLdb
 
@@ -258,9 +258,161 @@ def viewStudentTermPlans():
 
   return render_template("student-term-plans.j2", student_term_plans=student_term_plans, students=students, terms=terms, courses=courses)
   
-
+@app.route("/add-student-term-plan", methods=["POST"])
 def addStudentTermPlan():
-  pass
+  try:
+    # Get posted form data
+    request_data = request.get_json()
+    student_id = request_data.get("student_id")
+    term_id = request_data.get("term_id")
+    advisor_approved = request_data.get("advisor_approved")
+    courses = request_data.get("courses")
+
+    if not all([student_id, term_id, advisor_approved]):
+      return jsonify(message = "Not all required attributes were provided in the request"), 400
+    
+    # Check DB connection and reconnect if needed
+    mysql_connection = connectToDB()
+
+    try:
+      # Check if student term plan already exists for provided student/term
+      query = """
+        SELECT studentTermPlanID
+        FROM StudentTermPlans
+        WHERE studentID = %s AND termID = %s
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_id, term_id))
+      student_term_plan_id = cursor.fetchone()
+
+      if student_term_plan_id:
+        return jsonify(message = "A student term plan already exists for the provided student and term."), 400
+
+      # Add student term plan
+      query = """
+        INSERT INTO StudentTermPlans (studentID, termID, advisorApproved)
+        VALUES (%s, %s, %s);
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_id, term_id, advisor_approved))
+      mysql_connection.commit()
+
+      # Add courses 
+      status, code = addStudentTermPlanCourses(student_id, term_id, courses)
+      if code == 200:
+        return jsonify(message = "The student term plan and courses have been successfully added."), 200
+      else:
+        return jsonify(message = f"The student term plan has been successfully added but the courses failed to add due to the following error: {status}."), 500
+    
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+    finally:
+      cursor.close()
+
+  except Exception as error:
+    return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+
+def addStudentTermPlanCourses(student_id, term_id, courses):
+  try:
+    # Check DB connection and reconnect if needed
+    mysql_connection = connectToDB()
+
+    try:
+      # Iterate through course ids and insert into StudentTermPlans_has_Courses
+      for course_id in courses:
+        query = """
+          INSERT INTO StudentTermPlans_has_Courses (studentTermPlanID, courseID)
+          VALUES ((SELECT studentTermPlanID FROM StudentTermPlans WHERE studentID = %s AND termID = %s), %s);
+        """
+
+        # Execute query
+        cursor = mysql_connection.cursor()
+        cursor.execute(query, (student_id, term_id, course_id))
+        mysql_connection.commit()
+
+      return "All courses have been added for the provided student term plan.", 200
+        
+    except MySQLdb.DatabaseError as error:
+      return f"The following error has occurred: {str(error)}", 500
+    
+    finally:
+      cursor.close()
+
+  except Exception as error:
+    return f"The following error has occurred: {str(error)}", 500
+
+@app.route("/edit-student-term-plan", methods=["PATCH"])
+def editStudentTermPlan():
+  try:
+    # Get posted form data
+    request_data = request.get_json()
+    student_term_plan_course_id = request_data.get("student_term_plan_course_id")
+    course_id = request_data.get("course_id")
+
+    if not all([student_term_plan_course_id, course_id]):
+      return jsonify(message = "Not all required attributes were provided in the request"), 400
+    
+    # Check DB connection and reconnect if needed
+    mysql_connection = connectToDB()
+
+    try:
+      query = """
+        UPDATE  StudentTermPlans_has_Courses (studentTermPlanCourseID, courseID)
+        SET courseID = %s
+        WHERE studentTermPlanCourseID = %s
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (course_id, student_term_plan_course_id))
+      mysql_connection.commit()
+
+      return jsonify(message = "The course has been updated."), 200
+
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+    finally:
+      cursor.close()
+
+  except Exception as error:
+    return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+
+@app.route("/delete-student-term-plan/<int:student_term_plan_course_id>", methods=["DELETE"])
+def deleteStudentTermPlan(student_term_plan_course_id):
+  try:
+    if not student_term_plan_course_id:
+      return jsonify(message = "Not all required attributes were provided in the request"), 400
+    
+    # Check DB connection and reconnect if needed
+    mysql_connection = connectToDB()
+
+    try:
+      query = """
+        DELETE FROM StudentTermPlans_has_Courses
+        WHERE studentTermPlanCourseID = %s
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_term_plan_course_id,))
+      mysql_connection.commit()
+
+      return jsonify(message = "The student course plan has been deleted."), 200
+
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+    finally:
+      cursor.close()
+
+  except Exception as error:
+    return jsonify(message = f"The following error has occurred: {str(error)}"), 500
 
 # //////// #
 # STUDENTS #
