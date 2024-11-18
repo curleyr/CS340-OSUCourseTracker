@@ -263,6 +263,7 @@ def addStudentTermPlan():
   try:
     # Get posted form data
     request_data = request.get_json()
+    print(request_data)
 
     student_id = request_data.get("student_id")
     term_id = request_data.get("term_id")

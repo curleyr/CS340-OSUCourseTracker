@@ -14,64 +14,122 @@
   <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}" />
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    // /////////// //
+    // FUNCTION    //
+    // PAGE TOGGLE //
+    // /////////// //
+    // Handle toggling page from viewing student_term_plans to adding a student_term_plan and back
+    function toggleStudentTermPlanForm() {
+      const view_student_term_plans_section = document.getElementById("view_student_term_plans_section");
+      const add_student_term_plan_section = document.getElementById("add_student_term_plan_section");
 
-      // //////// //
-      // FUNCTION //
-      // //////// //
-      // Handle toggling page from viewing student_term_plans to adding a student_term_plan and back
-      //TODO uncomment line below for final submission 
-      //document.getElementById("add_student_term_plan_button").addEventListener("click", toggleStudentTermPlanForm);
-      document.getElementById("cancel_add_student_term_plan_button").addEventListener("click", toggleStudentTermPlanForm);
-      function toggleStudentTermPlanForm() {
-        const view_student_term_plans_section = document.getElementById("view_student_term_plans_section");
-        const add_student_term_plan_section = document.getElementById("add_student_term_plan_section");
+      if (view_student_term_plans_section.style.display === "block") {
+        view_student_term_plans_section.style.display = "none";
+        add_student_term_plan_section.style.display = "block";
 
-        if (view_student_term_plans_section.style.display === "block") {
-          view_student_term_plans_section.style.display = "none";
-          add_student_term_plan_section.style.display = "block";
+      } else {
+        view_student_term_plans_section.style.display = "block";
+        add_student_term_plan_section.style.display = "none";
+      }
+    };
 
-        } else {
-          view_student_term_plans_section.style.display = "block";
-          add_student_term_plan_section.style.display = "none";
-        }
-      };
+    // ///////////////////// //
+    // FUNCTION              //
+    // ADD STUDENT TERM PLAN //
+    // ///////////////////// //
+    async function addStudentTermPlan(event) {
+      // Prevent page from refreshing
+      event.preventDefault();
 
-      // //////// //
-      // FUNCTION //
-      // //////// //
-      // Handle add new student_term_plan form submission
-      document.getElementById("add_student_term_plan_form").onsubmit = addStudentTermPlan;
+      // Instantiate FormData object
+      const formData = new FormData(event.target);
+      // Initialize data object. This will be built below
+      const data = {};
 
-      async function addStudentTermPlan(event) {
-        // Prevent page from refreshing
-        event.preventDefault();
-
-        // Instantiate FormData object
-        const formData = new FormData(event.target);
-        // Initialize data object. This will be built below
-        const data = {};
-
-        // Iterate through each key value pair from formData
-        formData.forEach((value, key) => {
-          // Course ID array needs to be constructed
-          if (key === "student_term_plan_course_ids") {
-            // Create empty student_term_plan_course_ids array if not already included in data object
-            if (!data[key]) {
-              data[key] = [];
-            }
-            // Push student_term_plan ID to student_term_plan_course_ids array
-            data[key].push(value);
-
-            // All non-student_term_plan keys can be pushed directly as separate data object properties
-          } else {
-            data[key] = value;
+      // Iterate through each key value pair from formData
+      formData.forEach((value, key) => {
+        // Course ID array needs to be constructed
+        if (key === "courses") {
+          // Create empty courses array if not already included in data object
+          if (!data[key]) {
+            data[key] = [];
           }
-        });
-        // Logging to console for debugging purposes
-        console.log(data);
-      };
-    });
+          // Push student_term_plan ID to courses array
+          data[key].push(value);
+
+          // All non-student_term_plan keys can be pushed directly as separate data object properties
+        } else {
+          data[key] = value;
+        }
+      })
+      // Logging to console for debugging purposes
+      console.log(data);
+
+      // Call Flask route to add student term plan
+      const response = await fetch(
+        '/add-student-term-plan', {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          method: 'POST',
+          body: JSON.stringify(data)
+        }
+      )
+
+      const message = await response.json();
+      console.log(JSON.stringify(message));
+
+      // Successful Response
+      if (response.status == 200) {
+      }
+      
+      // Reload page
+      location.reload();
+    }
+
+    // //////////////////////// //
+    // FUNCTION                 //
+    // DELETE STUDENT TERM PLAN //
+    // //////////////////////// //
+    // Handle add new student_term_plan form submission
+    async function deleteStudentTermPlan(event, student_term_plan_id, button_element) {
+      // Prevent page from refreshing
+      event.preventDefault();
+
+      // Display a confirmation popup
+      if (!confirm("Are you sure you want to delete this term plan?")) {
+        return
+      }
+
+      // Call Flask route to delete student term plan
+      const response = await fetch(
+        `/delete-student-term-plan/${student_term_plan_id}`, {
+          method: 'DELETE'
+        }
+      )
+    
+      const message = await response.json();
+      console.log(JSON.stringify(message));
+
+      // Successful Response
+      if (response.status == 200) {
+      
+        // Get the parent <tr> element and remove it after term plan has been deleted
+        const tr_element = button_element.closest("tr");
+        if (tr_element) {
+          tr_element.remove()
+        } else {
+          console.error("Couldn't remove the table row")
+        }
+      } 
+    }
+
+    // Add listeners
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("cancel_add_student_term_plan_button").addEventListener("click", toggleStudentTermPlanForm);
+      document.getElementById("add_student_term_plan_form").onsubmit = addStudentTermPlan;
+      document.getElementById("add_student_term_plan_button").addEventListener("click", toggleStudentTermPlanForm);
+    })
 
   </script>
 
@@ -108,7 +166,8 @@
           <th>Term</th>
           <th>Courses</th>
           <th>Advisor Approved</th>
-          <th>Update or Delete Student's Courses</th>
+          <th>Update/Delete Courses</th>
+          <th>Delete Plan</th>
         </tr>
         {% for student_term_plan in student_term_plans %}
         <tr>
@@ -126,20 +185,20 @@
           <td>{{ student_term_plan["advisorApproved"] }}</td>
           {# TODO: Add functionality to this button #}
           <td><button id="edit_student_term_plan_courses_button" type="button">Edit</button></td>
+          <td><button id="edit_student_term_plan_courses_button" type="button" onclick="deleteStudentTermPlan(event, {{ student_term_plan['studentTermPlanID'] }}, this)">Delete</button></td>
         </tr>
         {% endfor %}
       </table>
     </section>
 
     {# Add New Term Plan Section #}
-    {# TODO uncomment this line and delete line below for final submission <section id="add_student_term_plan_section" style="display: none;"> #}
-    <hr><section id="add_student_term_plan_section" style="display: block;">
+    <section id="add_student_term_plan_section" style="display: none;">
       <h3>Add New Student Term Plan</h3>
       <form id="add_student_term_plan_form" style="border: 1px solid black; padding: 15px;">
 
         {# Student #}
-        <label for="student_term_plan_student">Student</label><br>
-        <select name="student_term_plan_student" id="student_term_plan_student" aria-label="Student" required>
+        <label for="student_id">Student</label><br>
+        <select name="student_id" id="student_id" aria-label="Student" required>
           <option value="" disabled selected>Select a student</option>
 
           {% for student in students %}
@@ -149,8 +208,8 @@
         </select><br>
 
         {# Term #}
-        <label for="student_term_plan_term">Term</label><br>
-        <select name="student_term_plan_term" id="student_term_plan_term" aria-label="Term" required>
+        <label for="term_id">Term</label><br>
+        <select name="term_id" id="term_id" aria-label="Term" required>
           <option value="" disabled selected>Select a term</option>
 
           {% for term in terms %}
@@ -162,17 +221,17 @@
         {# Advisor Approved #}
         <p>Advisor Approved</p>
         <label>
-          <input type="radio" name="student_term_plan_advisor_approved" value=1>Yes
+          <input type="radio" name="advisor_approved" value=1>Yes
         </label><br>
         <label>
-          <input type="radio" name="student_term_plan_advisor_approved" value=0>No
+          <input type="radio" name="advisor_approved" value=0>No
         </label><br>
 
         {# Courses #}
         <p>Courses</p>
         {% for course in courses %}
         <label>
-          <input type="checkbox" name="student_term_plan_course_ids" value={{ course["courseID"] }}> {{ course["course"]
+          <input type="checkbox" name="courses" value={{ course["courseID"] }}> {{ course["course"]
           }}
         </label><br>
         {% endfor %}
