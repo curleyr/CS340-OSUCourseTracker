@@ -3,7 +3,6 @@ from database.db_config import connectToDB
 import MySQLdb
 
 app = Flask(__name__)
-
 # ///// #
 # INDEX #
 # ///// #
@@ -29,12 +28,12 @@ def viewCourses():
       c.courseID,
       CONCAT(c.code, ' ', c.name) AS course,
       c.credit,  
-      GROUP_CONCAT((SELECT CONCAT(code, ' ', name) FROM Courses WHERE courseID = pc.courseID) ORDER BY pc.courseID SEPARATOR ', ') AS prerequisites 
-      FROM Courses c 
-    LEFT JOIN Prerequisites p   
+      GROUP_CONCAT(CONCAT(pc.code, ' ', pc.name) ORDER BY pc.code SEPARATOR ', ') AS prerequisites 
+    FROM Courses c
+    LEFT JOIN Courses_has_Prerequisites p   
       ON c.courseID = p.courseID 
     LEFT JOIN Courses pc  
-      ON p.prerequisiteCourseID = pc.courseID 
+      ON p.prerequisiteID = pc.courseID 
     GROUP BY c.courseID 
     ORDER BY c.code ASC
   """
@@ -57,8 +56,79 @@ def viewCourses():
 
   return render_template("courses.j2", courses=courses)
 
+@app.route("/add-course", methods=["POST"])
 def addCourse():
-  pass
+  try:
+    # Get posted form data
+    request_data = request.get_json()
+
+    course_code = request_data.get("course_code")
+    course_credit = request_data.get("course_credit")
+    course_name = request_data.get("course_name")
+    prerequisite_course_ids = request_data.get("prerequisite_course_ids")
+
+    if any(parameter is None for parameter in [course_code, course_credit, course_name]):
+      return jsonify(message = "Not all required attributes were provided in the request"), 400
+
+    # Check DB connection and reconnect if needed
+    mysql_connection = connectToDB()
+
+    try:
+      # Check if course already exists
+      query = """
+        SELECT courseID
+        FROM Courses
+        WHERE code = %s
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (course_code,))
+      course_id = cursor.fetchone()
+
+      if course_id:
+        return jsonify(message = f"A class with code {course_code} already exists"), 400
+
+      # Add course
+      query = """
+        INSERT INTO Courses (code, name, credit)
+        VALUES (%s, %s, %s)
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (course_code, course_name, course_credit))
+      mysql_connection.commit()
+
+      if cursor.rowcount == 0:
+        return f"Failed to add course with code {course_code}.", 400
+
+      # Iterate through prerequisite course ids and insert into Courses_has_Prerequisites
+      for prerequisite_course_id in prerequisite_course_ids:
+        query = """
+          INSERT INTO Courses_has_Prerequisites (courseID, prerequisiteID)
+          VALUES ((SELECT courseID FROM Courses WHERE name = %s), %s)
+        """
+
+        # Execute query
+        cursor = mysql_connection.cursor()
+        cursor.execute(query, (course_name, prerequisite_course_id))
+        mysql_connection.commit()
+        
+        if cursor.rowcount == 0:
+          return f"Failed to add prerequisite with ID {prerequisite_course_id} for course with ID {course_id}.", 400
+
+      return jsonify(message = "Thse course and prerequisite(s) if any have been added."), 200
+
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+    finally:
+      cursor.close()
+
+  except Exception as error:
+    return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+
 
 # ///// #
 # TERMS #

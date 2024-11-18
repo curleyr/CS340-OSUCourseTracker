@@ -26,12 +26,12 @@
       c.courseID,
       CONCAT(c.code, ' ', c.name) AS course,
       c.credit,  
-      GROUP_CONCAT((SELECT CONCAT(code, ' ', name) FROM Courses WHERE courseID = pc.courseID) ORDER BY pc.courseID SEPARATOR ', ') AS prerequisites 
-      FROM Courses c 
+      GROUP_CONCAT(CONCAT(pc.code, ' ', pc.name) ORDER BY pc.code SEPARATOR ', ') AS prerequisites 
+    FROM Courses c
     LEFT JOIN Courses_has_Prerequisites p   
       ON c.courseID = p.courseID 
     LEFT JOIN Courses pc  
-      ON p.prerequisiteCourseID = pc.courseID 
+      ON p.prerequisiteID = pc.courseID 
     GROUP BY c.courseID 
     ORDER BY c.code ASC;
 
