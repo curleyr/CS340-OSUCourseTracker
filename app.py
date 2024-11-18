@@ -384,6 +384,37 @@ def editStudentTermPlan():
   except Exception as error:
     return jsonify(message = f"The following error has occurred: {str(error)}"), 500
 
+@app.route("/delete-student-term-plan/<int:student_term_plan_id>", methods=["DELETE"])
+def deleteStudentTermPlan(student_term_plan_id):
+  try:    
+    # Check DB connection and reconnect if needed
+    mysql_connection = connectToDB()
+
+    try:
+      query = """
+        DELETE FROM StudentTermPlans
+        WHERE studentTermPlanID = %s
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_term_plan_id,))
+      mysql_connection.commit()
+
+      if cursor.rowcount == 0:
+        return jsonify(message = "No student term plan found with the provided ID."), 404
+
+      return jsonify(message = "The student term plan has been deleted."), 200
+
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+    finally:
+      cursor.close()
+
+  except Exception as error:
+    return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+
 @app.route("/delete-student-term-plan-course/<int:student_term_plan_course_id>", methods=["DELETE"])
 def deleteStudentTermPlanCourse(student_term_plan_course_id):
   try:    
