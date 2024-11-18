@@ -363,7 +363,7 @@ def editStudentTermPlan():
 
     try:
       query = """
-        UPDATE  StudentTermPlans_has_Courses (studentTermPlanCourseID, courseID)
+        UPDATE StudentTermPlans_has_Courses
         SET courseID = %s
         WHERE studentTermPlanCourseID = %s
       """

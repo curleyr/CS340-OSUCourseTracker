@@ -127,7 +127,7 @@
     VALUES ((SELECT studentTermPlanID FROM StudentTermPlans WHERE studentID = :studentID_From_Dropdown_Input AND termID = :termID_From_Dropdown_Input), :courseID_From_Checkbox_Input);
 
     -- For Updating row of StudentTermPlans_has_Courses (courseID can be updated to NULL)
-    UPDATE  StudentTermPlans_has_Courses (studentTermPlanCourseID, courseID)
+    UPDATE  StudentTermPlans_has_Courses
     SET courseID = :courseID_from_Dropdown_input
     WHERE studentTermPlanCourseID = :studentTermPlanCourseID_passed_into_update_component;
 
