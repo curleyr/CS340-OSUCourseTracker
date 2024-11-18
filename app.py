@@ -335,6 +335,9 @@ def addStudentTermPlanCourses(student_id, term_id, courses):
         cursor = mysql_connection.cursor()
         cursor.execute(query, (student_id, term_id, course_id))
         mysql_connection.commit()
+        
+        if cursor.rowcount == 0:
+          return f"Failed to add course with ID {course_id} for student term plan.", 400
 
       return "All courses have been added for the provided student term plan.", 200
         
@@ -372,6 +375,9 @@ def editStudentTermPlan():
       cursor = mysql_connection.cursor()
       cursor.execute(query, (course_id, student_term_plan_course_id))
       mysql_connection.commit()
+
+      if cursor.rowcount == 0:
+        return jsonify(message = "No student term plan course found with the provided ID."), 404
 
       return jsonify(message = "The course has been updated."), 200
 
