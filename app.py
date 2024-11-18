@@ -263,7 +263,6 @@ def addStudentTermPlan():
   try:
     # Get posted form data
     request_data = request.get_json()
-    print(request_data)
 
     student_id = request_data.get("student_id")
     term_id = request_data.get("term_id")
@@ -354,18 +353,32 @@ def addStudentTermPlanCourses(student_id, term_id, courses):
 @app.route("/edit-student-term-plan", methods=["PATCH"])
 def editStudentTermPlan():
   try:
-    # Get posted form data
+     # Get posted form data
     request_data = request.get_json()
-    student_term_plan_course_id = request_data.get("student_term_plan_course_id")
-    course_id = request_data.get("course_id")
 
-    if not all([student_term_plan_course_id, course_id]):
-      return jsonify(message = "Not all required attributes were provided in the request"), 400
-    
+    student_term_plan_id = request_data.get("student_term_plan_id")
+    course_id = request_data.get("course_id")
+    new_course_id = request_data.get("new_course_id")
+
     # Check DB connection and reconnect if needed
     mysql_connection = connectToDB()
 
     try:
+      # Get student term plan course id
+      query = """
+        SELECT studentTermPlanCourseID
+        FROM StudentTermPlans_has_Courses
+        WHERE studentTermPlanID = %s AND courseID = %s           
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_term_plan_id, course_id))
+      student_term_plan_course_id = cursor.fetchone()
+
+      if not student_term_plan_course_id:
+        return jsonify(message = "No student term plan course id was found using the provided student term plan id and course id."), 400
+
       query = """
         UPDATE StudentTermPlans_has_Courses
         SET courseID = %s
@@ -374,7 +387,7 @@ def editStudentTermPlan():
 
       # Execute query
       cursor = mysql_connection.cursor()
-      cursor.execute(query, (course_id, student_term_plan_course_id))
+      cursor.execute(query, (new_course_id, student_term_plan_course_id))
       mysql_connection.commit()
 
       if cursor.rowcount == 0:
@@ -422,13 +435,34 @@ def deleteStudentTermPlan(student_term_plan_id):
   except Exception as error:
     return jsonify(message = f"The following error has occurred: {str(error)}"), 500
 
-@app.route("/delete-student-term-plan-course/<int:student_term_plan_course_id>", methods=["DELETE"])
-def deleteStudentTermPlanCourse(student_term_plan_course_id):
-  try:    
+@app.route("/delete-student-term-plan-course", methods=["DELETE"])
+def deleteStudentTermPlanCourse():
+  try:   
+    # Get posted form data
+    request_data = request.get_json()
+
+    student_term_plan_id = request_data.get("student_term_plan_id")
+    course_id = request_data.get("course_id")
+
     # Check DB connection and reconnect if needed
     mysql_connection = connectToDB()
 
     try:
+      # Get student term plan course id
+      query = """
+        SELECT studentTermPlanCourseID
+        FROM StudentTermPlans_has_Courses
+        WHERE studentTermPlanID = %s AND courseID = %s           
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_term_plan_id, course_id))
+      student_term_plan_course_id = cursor.fetchone()
+
+      if not student_term_plan_course_id:
+        return jsonify(message = "No student term plan course id was found using the provided student term plan id and course id."), 400
+
       query = """
         DELETE FROM StudentTermPlans_has_Courses
         WHERE studentTermPlanCourseID = %s
@@ -442,7 +476,7 @@ def deleteStudentTermPlanCourse(student_term_plan_course_id):
       if cursor.rowcount == 0:
         return jsonify(message = "No course found with the provided ID."), 404
 
-      return jsonify(message = "The student course plan has been deleted."), 200
+      return jsonify(message = "The student course plan course has been deleted."), 200
 
     except MySQLdb.DatabaseError as error:
       return jsonify(message = f"The following error has occurred: {str(error)}"), 500
@@ -507,5 +541,5 @@ if __name__ == "__main__":
   stop:
     pkill -f 'gunicorn --name OSUCourseTracker'
   """
-  #app.run()
-  app.run(port=8007, debug=True)
+  app.run()
+  #app.run(port=8007, debug=True)
