@@ -263,12 +263,13 @@ def addStudentTermPlan():
   try:
     # Get posted form data
     request_data = request.get_json()
+
     student_id = request_data.get("student_id")
     term_id = request_data.get("term_id")
     advisor_approved = request_data.get("advisor_approved")
     courses = request_data.get("courses")
 
-    if not all([student_id, term_id, advisor_approved]):
+    if any(parameter is None for parameter in [student_id, term_id, advisor_approved, courses]):
       return jsonify(message = "Not all required attributes were provided in the request"), 400
     
     # Check DB connection and reconnect if needed
@@ -468,4 +469,5 @@ if __name__ == "__main__":
   stop:
     pkill -f 'gunicorn --name OSUCourseTracker'
   """
-  app.run()
+  #app.run()
+  app.run(port=8007, debug=True)
