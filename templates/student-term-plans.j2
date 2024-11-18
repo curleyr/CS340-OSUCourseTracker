@@ -18,7 +18,7 @@
     // FUNCTION    //
     // PAGE TOGGLE //
     // /////////// //
-    // Handle toggling page from viewing student_term_plans to adding a student_term_plan and back
+    // Handle toggling section displays
     function toggleStudentTermPlanForm(section_to_display, reload=false) {
       if(reload) {
         location.reload()
@@ -44,6 +44,7 @@
     // FUNCTION              //
     // ADD STUDENT TERM PLAN //
     // ///////////////////// //
+    // Handle adding a student term plan
     async function addStudentTermPlan(event) {
       // Prevent page from refreshing
       event.preventDefault();
@@ -99,7 +100,7 @@
     // FUNCTION                 //
     // DELETE STUDENT TERM PLAN //
     // //////////////////////// //
-    // Handle add new student_term_plan form submission
+    // Handle deleting a student term plan
     async function deleteStudentTermPlan(event, student_term_plan_id, button_element) {
       // Prevent page from refreshing
       event.preventDefault();
@@ -139,7 +140,7 @@
     // FUNCTION                        //
     // DELETE STUDENT TERM PLAN COURSE //
     // /////////////////////////////// //
-    // Handle add new student_term_plan form submission
+    // Handle deleting a student term plan course
     async function deleteStudentTermPlanCourse(event, student_term_plan_id, course_id, button_element) {
       // Prevent page from refreshing
       event.preventDefault();
@@ -193,7 +194,7 @@
     // FUNCTION                               //
     // BUILD UPDATE STUDENT TERM PLAN SECTION //
     // ////////////////////////////////////// //
-    // Handle add new student_term_plan form submission
+    // Handle building the student term plan section and toggling display of it to on
     function buildUpdateStudentTermPlanSection(event, student_term_plan_id, student_name, term_name, courses) {
       // Prevent page from refreshing
       event.preventDefault();
@@ -268,7 +269,7 @@
     // FUNCTION                        //
     // UPDATE STUDENT TERM PLAN COURSE //
     // /////////////////////////////// //
-    // Handle add new student_term_plan form submission
+    // Handle updating a student term plan course
     async function updateStudentTermPlanCourse(event, student_term_plan_id, course_id, button_element) {
       // Prevent page from refreshing
       event.preventDefault();
