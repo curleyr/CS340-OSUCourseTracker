@@ -129,7 +129,6 @@ def addCourse():
   except Exception as error:
     return jsonify(message = f"The following error has occurred: {str(error)}"), 500
 
-
 # ///// #
 # TERMS #
 # //////#
@@ -200,7 +199,79 @@ def viewTerms():
 
 @app.route("/add-term", methods=["POST"])
 def addTerm():
-  pass
+  try:
+    # Get posted form data
+    request_data = request.get_json()
+
+    term_season = request_data.get("term_season")
+    term_year = request_data.get("term_year")
+    term_start_date = request_data.get("term_start_date")
+    term_end_date = request_data.get("term_end_date")
+    term_course_ids = request_data.get("term_course_ids")
+
+    if any(parameter is None for parameter in [term_season, term_year, term_start_date, term_end_date]):
+      return jsonify(message = "Not all required attributes were provided in the request"), 400
+
+    term_name = f"{term_season} {term_year}"
+
+    # Check DB connection and reconnect if needed
+    mysql_connection = connectToDB()
+
+    try:
+      # Check if term already exists
+      query = """
+        SELECT termID
+        FROM Terms
+        WHERE name = %s
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (term_name,))
+      term_id = cursor.fetchone()
+
+      if term_id:
+        return jsonify(message = f"A term with the name of {term_name} already exists"), 400
+
+      # Add term
+      query = """
+        INSERT INTO Terms (name, startDate, endDate)
+        VALUES (%s, %s, %s);
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (term_name, term_start_date, term_end_date))
+      mysql_connection.commit()
+
+      if cursor.rowcount == 0:
+        return f"Failed to add term with name of {term_name}.", 400
+
+      # Iterate through term course ids and insert into Terms_has_Courses
+      for term_course_id in term_course_ids:
+        query = """
+          INSERT INTO Terms_has_Courses (termID, courseID)
+          VALUES ((SELECT termID FROM Terms WHERE name = %s), %s);
+        """
+
+        # Execute query
+        cursor = mysql_connection.cursor()
+        cursor.execute(query, (term_name, term_course_id))
+        mysql_connection.commit()
+        
+        if cursor.rowcount == 0:
+          return f"Failed to add course with ID {term_course_id} for {term_name} term.", 400
+
+      return jsonify(message = "The term and courses if any have been added."), 200
+
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+    finally:
+      cursor.close()
+
+  except Exception as error:
+    return jsonify(message = f"The following error has occurred: {str(error)}"), 500
 
 # ////////////////// #
 # STUDENT TERM PLANS #
@@ -611,5 +682,5 @@ if __name__ == "__main__":
   stop:
     pkill -f 'gunicorn --name OSUCourseTracker'
   """
-  app.run()
-  #app.run(port=8007, debug=True)
+  #app.run()
+  app.run(port=8007, debug=True)
