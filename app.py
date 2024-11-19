@@ -94,7 +94,7 @@ def addCourse():
       # Execute query
       cursor = mysql_connection.cursor()
       cursor.execute(query, (course_code,))
-      course_id = cursor.fetchone()
+      course_id = cursor.fetchone() 
 
       if course_id:
         return jsonify(message = f"A class with code {course_code} already exists"), 400
@@ -114,19 +114,20 @@ def addCourse():
         return f"Failed to add course with code {course_code}.", 400
 
       # Iterate through prerequisite course ids and insert into Courses_has_Prerequisites
-      for prerequisite_course_id in prerequisite_course_ids:
-        query = """
-          INSERT INTO Courses_has_Prerequisites (courseID, prerequisiteID)
-          VALUES ((SELECT courseID FROM Courses WHERE name = %s), %s)
-        """
+      if prerequisite_course_ids:
+        for prerequisite_course_id in prerequisite_course_ids:
+          query = """
+            INSERT INTO Courses_has_Prerequisites (courseID, prerequisiteID)
+            VALUES ((SELECT courseID FROM Courses WHERE name = %s), %s)
+          """
 
-        # Execute query
-        cursor = mysql_connection.cursor()
-        cursor.execute(query, (course_name, prerequisite_course_id))
-        mysql_connection.commit()
-        
-        if cursor.rowcount == 0:
-          return f"Failed to add prerequisite with ID {prerequisite_course_id} for course with ID {course_id}.", 400
+          # Execute query
+          cursor = mysql_connection.cursor()
+          cursor.execute(query, (course_name, prerequisite_course_id))
+          mysql_connection.commit()
+          
+          if cursor.rowcount == 0:
+            return f"Failed to add prerequisite with ID {prerequisite_course_id} for course with ID {course_id}.", 400
 
       return jsonify(message = "Thse course and prerequisite(s) if any have been added."), 200
 
@@ -153,12 +154,12 @@ def viewTerms():
     # --------------
     # Retrieve all terms from 'Terms' table
     query = """
-      SELECT 
+      SELECT
         t.*, 
         GROUP_CONCAT(CONCAT(c.code, ' ', c.name) ORDER BY c.courseID ASC SEPARATOR ', ') AS courses
       FROM Terms t
-      INNER JOIN Terms_has_Courses thc ON t.termID = thc.termID
-      INNER JOIN Courses c ON thc.courseID = c.courseID
+      LEFT JOIN Terms_has_Courses thc ON t.termID = thc.termID
+      LEFT JOIN Courses c ON thc.courseID = c.courseID
       GROUP BY t.termID
       ORDER BY t.startDate ASC;
     """
@@ -268,19 +269,20 @@ def addTerm():
         return f"Failed to add term with name of {term_name}.", 400
 
       # Iterate through term course ids and insert into Terms_has_Courses
-      for term_course_id in term_course_ids:
-        query = """
-          INSERT INTO Terms_has_Courses (termID, courseID)
-          VALUES ((SELECT termID FROM Terms WHERE name = %s), %s);
-        """
+      if term_course_ids:
+        for term_course_id in term_course_ids:
+          query = """
+            INSERT INTO Terms_has_Courses (termID, courseID)
+            VALUES ((SELECT termID FROM Terms WHERE name = %s), %s);
+          """
 
-        # Execute query
-        cursor = mysql_connection.cursor()
-        cursor.execute(query, (term_name, term_course_id))
-        mysql_connection.commit()
-        
-        if cursor.rowcount == 0:
-          return f"Failed to add course with ID {term_course_id} for {term_name} term.", 400
+          # Execute query
+          cursor = mysql_connection.cursor()
+          cursor.execute(query, (term_name, term_course_id))
+          mysql_connection.commit()
+          
+          if cursor.rowcount == 0:
+            return f"Failed to add course with ID {term_course_id} for {term_name} term.", 400
 
       return jsonify(message = "The term and courses if any have been added."), 200
 
@@ -722,5 +724,5 @@ if __name__ == "__main__":
   stop:
     pkill -f 'gunicorn --name OSUCourseTracker'
   """
-  app.run()
-  #app.run(port=8007, debug=True)
+  #app.run()
+  app.run(port=8007, debug=True)

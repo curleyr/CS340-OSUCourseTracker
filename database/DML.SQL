@@ -54,8 +54,8 @@
       t.*, 
       GROUP_CONCAT(CONCAT(c.code, ' ', c.name) ORDER BY c.courseID ASC SEPARATOR ', ') AS courses
     FROM Terms t
-    INNER JOIN Terms_has_Courses thc ON t.termID = thc.termID
-    INNER JOIN Courses c ON thc.courseID = c.courseID
+    LEFT JOIN Terms_has_Courses thc ON t.termID = thc.termID
+    LEFT JOIN Courses c ON thc.courseID = c.courseID
     GROUP BY t.termID
     ORDER BY t.startDate ASC;
 
