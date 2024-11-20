@@ -3,6 +3,8 @@ from database.db_config import connectToDB
 import MySQLdb
 
 app = Flask(__name__)
+mysql_connection = connectToDB()
+
 # ///// #
 # INDEX #
 # ///// #
@@ -16,8 +18,10 @@ def index():
 # /////// #
 @app.route("/courses", methods=["GET"])
 def viewCourses():
+  global mysql_connection
   try:
-    # Check DB connection and reconnect if needed
+    # Close db connection then reopen to avoid caching of data
+    mysql_connection.close()
     mysql_connection = connectToDB()
 
     # ---------------------------------
@@ -68,6 +72,7 @@ def viewCourses():
 
 @app.route("/add-course", methods=["POST"])
 def addCourse():
+  global mysql_connection
   try:
     # Get posted form data
     request_data = request.get_json()
@@ -145,8 +150,10 @@ def addCourse():
 # //////#
 @app.route("/terms", methods=["GET"])
 def viewTerms():
+  global mysql_connection
   try:
-    # Check DB connection and reconnect if needed
+    # Close db connection then reopen to avoid caching of data
+    mysql_connection.close()
     mysql_connection = connectToDB()
 
     # --------------
@@ -220,6 +227,7 @@ def viewTerms():
 
 @app.route("/add-term", methods=["POST"])
 def addTerm():
+  global mysql_connection
   try:
     # Get posted form data
     request_data = request.get_json()
@@ -300,8 +308,10 @@ def addTerm():
 # ///////////////////#
 @app.route("/student-term-plans", methods=["GET"])
 def viewStudentTermPlans():
+  global mysql_connection
   try:
-    # Check DB connection and reconnect if needed
+    # Close db connection then reopen to avoid caching of data
+    mysql_connection.close()
     mysql_connection = connectToDB()
     
     # ----------------------------
@@ -433,6 +443,7 @@ def viewStudentTermPlans():
 
 @app.route("/add-student-term-plan", methods=["POST"])
 def addStudentTermPlan():
+  global mysql_connection
   try:
     # Get posted form data
     request_data = request.get_json()
@@ -492,6 +503,7 @@ def addStudentTermPlan():
     return jsonify(message = f"The following error has occurred: {str(error)}"), 500
 
 def addStudentTermPlanCourses(student_id, term_id, courses):
+  global mysql_connection
   try:
     # Check DB connection and reconnect if needed
     mysql_connection = connectToDB()
@@ -525,6 +537,7 @@ def addStudentTermPlanCourses(student_id, term_id, courses):
 
 @app.route("/edit-student-term-plan", methods=["PATCH"])
 def editStudentTermPlan():
+  global mysql_connection
   try:
      # Get posted form data
     request_data = request.get_json()
@@ -533,7 +546,6 @@ def editStudentTermPlan():
     course_id = request_data.get("course_id")
     new_course_id = request_data.get("new_course_id")
     action = request_data.get("action")
-    print(action)
 
     if new_course_id == "None":
       new_course_id = None
@@ -580,6 +592,7 @@ def editStudentTermPlan():
 
 @app.route("/delete-student-term-plan/<int:student_term_plan_id>", methods=["DELETE"])
 def deleteStudentTermPlan(student_term_plan_id):
+  global mysql_connection
   try:    
     # Check DB connection and reconnect if needed
     mysql_connection = connectToDB()
@@ -611,6 +624,7 @@ def deleteStudentTermPlan(student_term_plan_id):
 
 @app.route("/delete-student-term-plan-course", methods=["DELETE"])
 def deleteStudentTermPlanCourse():
+  global mysql_connection
   try:   
     # Get posted form data
     request_data = request.get_json()
@@ -666,8 +680,10 @@ def deleteStudentTermPlanCourse():
 # /////////#
 @app.route("/students", methods=["GET"])
 def viewStudents():
+  global mysql_connection
   try:
-    # Check DB connection and reconnect if needed
+    # Close db connection then reopen to avoid caching of data
+    mysql_connection.close()
     mysql_connection = connectToDB()
 
     # --------------
