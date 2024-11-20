@@ -532,6 +532,8 @@ def editStudentTermPlan():
     student_term_plan_id = request_data.get("student_term_plan_id")
     course_id = request_data.get("course_id")
     new_course_id = request_data.get("new_course_id")
+    action = request_data.get("action")
+    print(action)
 
     if new_course_id == "None":
       new_course_id = None
@@ -540,21 +542,32 @@ def editStudentTermPlan():
     mysql_connection = connectToDB()
 
     try:
-      query = """
-        UPDATE StudentTermPlans_has_Courses
-        SET courseID = %s
-        WHERE studentTermPlanCourseID = (SELECT studentTermPlanCourseID FROM StudentTermPlans_has_Courses WHERE studentTermPlanID = %s AND courseID = %s)
-      """
+      # Updating existing course 
+      if action == "update":
+        query = """
+          UPDATE StudentTermPlans_has_Courses
+          SET courseID = %s
+          WHERE studentTermPlanCourseID = (SELECT studentTermPlanCourseID FROM StudentTermPlans_has_Courses WHERE studentTermPlanID = %s AND courseID = %s)
+        """
+        parameters = (new_course_id, student_term_plan_id, course_id)
 
+      # Adding new course
+      else:
+        query = """
+          INSERT INTO StudentTermPlans_has_Courses (studentTermPlanID, courseID)
+          VALUES (%s, %s)
+        """
+        parameters = (student_term_plan_id, new_course_id)
+        
       # Execute query
       cursor = mysql_connection.cursor()
-      cursor.execute(query, (new_course_id, student_term_plan_id, course_id))
+      cursor.execute(query, parameters)
       mysql_connection.commit()
 
       if cursor.rowcount == 0:
         return jsonify(message = "No student term plan course found with the provided ID."), 404
 
-      return jsonify(message = "The course has been updated."), 200
+      return jsonify(message = f"The course has been {'updated' if action == 'update' else 'added'}."), 200
 
     except MySQLdb.DatabaseError as error:
       return jsonify(message = f"The following error has occurred: {str(error)}"), 500

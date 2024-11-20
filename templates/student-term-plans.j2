@@ -210,13 +210,14 @@
       edit_section.innerHTML = "";
 
       let edit_section_html = `
-        <h3>Update or Delete Courses - ${term_name} Plan for ${student_name}</h3>
+        <h2>${term_name} Plan for ${student_name}</h2>
+        <h3>Update or Delete Course</h3>
         <button id="cancel_edit_student_term_plan_courses_section" type="button" onclick="toggleStudentTermPlanForm('view_student_term_plans_section', reload=true)">Cancel</button>
         <table border="1">
           <tr>
             <th>Current Course</th>
             <th>Updated Course</th>
-            <th>Submit Change</th>
+            <th>Submit</th>
             <th>Delete</th>
           </tr>
       `
@@ -258,6 +259,38 @@
         `
       }
 
+      edit_section_html += `
+      </table>
+      
+      <h3>Add Course</h3>
+      <button id="cancel_edit_student_term_plan_courses_section" type="button" onclick="toggleStudentTermPlanForm('view_student_term_plans_section', reload=true)">Cancel</button>
+      <table border="1">
+        <tr>
+          <th>New Course</th>
+          <th>Submit</th>
+        </tr>
+        <tr>
+          <td>
+            <select name="student_term_plan_add_course" id="student_term_plan_add_course"aria-label="Course">
+              <option value="" disabled selected>Select a course</option>
+      `;
+          
+      for (const course_object of course_objects) {
+        const is_current_course = courses_array.includes(course_object["course"]);
+        
+        edit_section_html += `
+          <option value="${course_object["courseID"]}" ${is_current_course ? "disabled" : ""}>
+            ${course_object["course"]}
+          </option>
+        `;
+      }
+
+      edit_section_html += `
+            </select>
+            </td>
+            <td><button type="button" onclick="addStudentTermPlanCourse(event, ${student_term_plan_id}, this)">Submit</button></td>
+          </tr>
+        `
       edit_section_html += "</table>";
 
       // Apply html to section and toggle view to on
@@ -289,7 +322,42 @@
             "Content-Type": "application/json"
           },
           method: "PATCH",
-          body: JSON.stringify({"student_term_plan_id": student_term_plan_id, "course_id": course_id, "new_course_id": new_course_id})
+          body: JSON.stringify({"action": "update", "student_term_plan_id": student_term_plan_id, "course_id": course_id, "new_course_id": new_course_id})
+        }
+      )
+    
+      const message = await response.json();
+      console.log(JSON.stringify(message));
+
+      // Display confirmation/error popup on screen
+      window.alert(message["message"].replace('"', ''));
+
+      // Successful Response
+      if (response.status == 200) {
+        toggleStudentTermPlanForm("view_student_term_plans_section", refresh=true)
+      } 
+    }
+
+    // //////////////////////////// //
+    // FUNCTION                     //
+    // ADD STUDENT TERM PLAN COURSE //
+    // //////////////////////////// //
+    // Handle adding a student term plan course
+    async function addStudentTermPlanCourse(event, student_term_plan_id, button_element) {
+      // Prevent page from refreshing
+      event.preventDefault();
+
+      // Get new course ID from value of closest select option
+      const new_course_id = button_element.closest("tr").querySelector("select").value;
+      
+      // Call Flask route to add student term plan course
+      const response = await fetch(
+        "/edit-student-term-plan", {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          method: "PATCH",
+          body: JSON.stringify({"action": "add", "student_term_plan_id": student_term_plan_id, "new_course_id": new_course_id})
         }
       )
     
@@ -345,7 +413,7 @@
           <th>Term</th>
           <th>Courses</th>
           <th>Advisor Approved</th>
-          <th>Update/Delete Courses</th>
+          <th>Add/Update/Delete Courses</th>
           <th>Delete Plan</th>
         </tr>
         {% for student_term_plan in student_term_plans %}
