@@ -42,7 +42,7 @@
 
     -- Then can also insert prerequisite for each prerequisite checkbox submitted on form
     INSERT INTO Courses_has_Prerequisites (courseID, prerequisiteCourseID)
-    VALUES ((SELECT courseID FROM Courses WHERE name = :nameInput), :prerequisiteCourseID_From_Checkbox_Input);
+    VALUES ((SELECT courseID FROM Courses WHERE code = :codeInput), :prerequisiteCourseID_From_Checkbox_Input);
 
   -- ---------------------------------------------------------
   -- TERMS PAGE

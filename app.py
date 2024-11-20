@@ -111,25 +111,26 @@ def addCourse():
       mysql_connection.commit()
 
       if cursor.rowcount == 0:
-        return f"Failed to add course with code {course_code}.", 400
+        return f"Failed to add course with name {course_code} {course_name}.", 400
 
       # Iterate through prerequisite course ids and insert into Courses_has_Prerequisites
       if prerequisite_course_ids:
         for prerequisite_course_id in prerequisite_course_ids:
           query = """
             INSERT INTO Courses_has_Prerequisites (courseID, prerequisiteID)
-            VALUES ((SELECT courseID FROM Courses WHERE name = %s), %s)
+            VALUES ((SELECT courseID FROM Courses WHERE code = %s), %s)
           """
 
           # Execute query
           cursor = mysql_connection.cursor()
-          cursor.execute(query, (course_name, prerequisite_course_id))
+          #TODO FIGURE THIS OUT
+          cursor.execute(query, (course_code, prerequisite_course_id))
           mysql_connection.commit()
           
           if cursor.rowcount == 0:
             return f"Failed to add prerequisite with ID {prerequisite_course_id} for course with ID {course_id}.", 400
 
-      return jsonify(message = "Thse course and prerequisite(s) if any have been added."), 200
+      return jsonify(message = "The course and prerequisite(s) if any have been added."), 200
 
     except MySQLdb.DatabaseError as error:
       return jsonify(message = f"The following error has occurred: {str(error)}"), 500
