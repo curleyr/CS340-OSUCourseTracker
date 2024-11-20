@@ -129,7 +129,7 @@
     -- For Updating row of StudentTermPlans_has_Courses (courseID can be updated to NULL)
     UPDATE  StudentTermPlans_has_Courses
     SET courseID = :courseID_from_Dropdown_input
-    WHERE studentTermPlanCourseID = :studentTermPlanCourseID_passed_into_update_component;
+    WHERE studentTermPlanCourseID = (SELECT studentTermPlanCourseID FROM StudentTermPlans_has_Courses WHERE studentTermPlanID = :studentID_From_Dropdown_Input AND courseID = :courseID_From_Checkbox_Input)
 
     -- For Deleting row of StudentTermPlans_has_Courses
     DELETE FROM StudentTermPlans_has_Courses

@@ -123,7 +123,6 @@ def addCourse():
 
           # Execute query
           cursor = mysql_connection.cursor()
-          #TODO FIGURE THIS OUT
           cursor.execute(query, (course_code, prerequisite_course_id))
           mysql_connection.commit()
           
@@ -534,34 +533,22 @@ def editStudentTermPlan():
     course_id = request_data.get("course_id")
     new_course_id = request_data.get("new_course_id")
 
+    if new_course_id == "None":
+      new_course_id = None
+
     # Check DB connection and reconnect if needed
     mysql_connection = connectToDB()
 
     try:
-      # Get student term plan course id
-      query = """
-        SELECT studentTermPlanCourseID
-        FROM StudentTermPlans_has_Courses
-        WHERE studentTermPlanID = %s AND courseID = %s           
-      """
-
-      # Execute query
-      cursor = mysql_connection.cursor()
-      cursor.execute(query, (student_term_plan_id, course_id))
-      student_term_plan_course_id = cursor.fetchone()
-
-      if not student_term_plan_course_id:
-        return jsonify(message = "No student term plan course id was found using the provided student term plan id and course id."), 400
-
       query = """
         UPDATE StudentTermPlans_has_Courses
         SET courseID = %s
-        WHERE studentTermPlanCourseID = %s
+        WHERE studentTermPlanCourseID = (SELECT studentTermPlanCourseID FROM StudentTermPlans_has_Courses WHERE studentTermPlanID = %s AND courseID = %s)
       """
 
       # Execute query
       cursor = mysql_connection.cursor()
-      cursor.execute(query, (new_course_id, student_term_plan_course_id))
+      cursor.execute(query, (new_course_id, student_term_plan_id, course_id))
       mysql_connection.commit()
 
       if cursor.rowcount == 0:
