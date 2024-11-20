@@ -722,11 +722,75 @@ def viewStudents():
   finally:
     cursor.close()
 
+@app.route("/add-student", methods=["POST"])
 def addStudent():
-  pass
+  global mysql_connection
+  try:
+    # Get form data
+    request_data = request.get_json()
 
-def removeStudent():
-  pass
+    student_id = request_data.get("student_id")
+    first_name = request_data.get("first_name")
+    last_name = request_data.get("last_name")
+
+    if any(parameter is None for parameter in [student_id, first_name, last_name]):
+      return jsonify(message = "Not all required attributes were provided in the request"), 400
+
+    # Close db connection then reopen to avoid caching of data
+    mysql_connection.close()
+    mysql_connection = connectToDB()
+  
+    try:
+      # Check if student ID already exists in database
+      query = """
+        SELECT studentID
+        FROM Students
+        WHERE studentID = %s
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_id,))
+      existing_student_id = cursor.fetchall()
+
+      if existing_student_id:
+        return jsonify(message = "A student already exists for the provided student id."), 400
+      
+      # Add student
+      query = """
+      INSERT INTO Students (studentID, firstName, lastName)
+      VALUES (%s, %s, %s)
+      """
+
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_id, first_name, last_name))
+      mysql_connection.commit()
+
+      return jsonify(message = "This student has been added."), 200
+    
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"Database: The following error has occurred: {str(error)}"), 500
+    
+    finally:
+      cursor.close()
+
+  except Exception as error:
+    return jsonify(message = f"Exception: The following error has occurred: {str(error)}"), 500
+
+@app.route("/delete-student/<str:id>", methods=["DELETE"])
+def removeStudent(id):
+  global mysql_connection
+  
+  query = """
+  DELETE FROM Students
+  WHERE studentID = %s;
+  """
+
+  cursor = mysql_connection.cursor()
+  cursor.execute(query, (id,))
+  mysql_connection.commit()
+
+  return redirect("/students")
 
 def updateStudent():
   pass
