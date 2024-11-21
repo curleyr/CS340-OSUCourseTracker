@@ -176,7 +176,8 @@
           <td>{{ student["id"] }}</td>
           <td>{{ student["firstName"] }}</td>
           <td>{{ student["lastName"] }}</td>
-          <td><button id="edit_student_button" type="button">Edit</button></td>
+          <td><a href="edit-student/{{ student['id'] }}"><button id="edit_student_button"
+                type="button">Edit</button></a></td>
           <td><button id="delete_student_button" type="button"
               onclick="deleteStudent(event, '{{ student['id'] }}', this)">Delete</button></td>
         </tr>
@@ -206,24 +207,6 @@
       </form>
     </section>
 
-    {# Update/Edit Student Section #}
-    <section id="edit_student_section" style="display: none;">
-      <h3>Edit Student Information</h3>
-      {# TODO: Make this dynamically show the student being edited. This is currently hard coded #}
-      <form id="edit_student_form" style="border: 1px solid black; padding: 15px;">
-        {# Student First Name #}
-        <label for="first_name">First Name</label>
-        <input type="text" name="first_name" id="first_name" aria-label="Student First Name" required value="April">
-        <br>
-        {# Student Last Name #}
-        <label for="last_name">Last Name</label>
-        <input type="text" name="last_name" id="last_name" aria-label="Student Last Name" required value="Wang"> <br>
-
-        {# Submit and Cancel Buttons #}
-        <button id="submit_edit_student_button" type="submit">Edit Student</button><br>
-        <button id="cancel_edit_student_button" type="button"
-          onclick="toggleStudentForm('view_students_section')">Cancel</button>
-      </form>
 
   </main>
 

@@ -777,7 +777,7 @@ def addStudent():
   except Exception as error:
     return jsonify(message = f"Exception: The following error has occurred: {str(error)}"), 500
 
-@app.route("/delete-student/", methods=["DELETE"])
+@app.route("/delete-student", methods=["DELETE"])
 def removeStudent():
   global mysql_connection
   try:   
@@ -813,8 +813,68 @@ def removeStudent():
   except Exception as error:
     return jsonify(message = f"The following error has occurred: {str(error)}"), 500
 
-def updateStudent():
-  pass
+@app.route("/edit-student/<id>", methods=["POST", "GET"])
+def updateStudent(id):
+  global mysql_connection
+  if request.method == "GET":
+    try:
+      # Close db connection then reopen to avoid caching of data
+      mysql_connection.close()
+      mysql_connection = connectToDB()
+
+      query = "SELECT * FROM Students WHERE studentId = %s" % (id)
+      cur = mysql_connection.cursor()
+      cur.execute(query)
+      student = cur.fetchall()
+
+      student = [
+        {
+          "id": row[0],
+          "firstName": row[1],
+          "lastName": row[2],
+        }
+        for row in student
+      ]
+
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+    except Exception as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+  
+    finally:
+      cur.close()
+
+    return render_template("edit_student.j2", student=student)
+    
+  
+  # If user submits form
+  if request.method == "POST":
+    if request.form.get("edit_student"):
+      student_id = request.form["studentID"]
+      first_name = request.form["first_name"]
+      last_name = request.form["last_name"]
+
+      try:
+        # Close db connection then reopen to avoid caching of data
+        mysql_connection.close()
+        mysql_connection = connectToDB()
+
+        query = "UPDATE Students SET firstName = %s, lastName = %s WHERE studentID = %s"
+        cur = mysql_connection.cursor()
+        cur.execute(query, (first_name, last_name, student_id))
+        mysql_connection.commit()
+    
+      except MySQLdb.DatabaseError as error:
+        return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+      
+      except Exception as error:
+        return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+      finally:
+        cur.close()
+  
+      return redirect("/students")
   
 # Listener
 if __name__ == "__main__":
