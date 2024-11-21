@@ -741,5 +741,5 @@ if __name__ == "__main__":
   stop:
     pkill -f 'gunicorn --name OSUCourseTracker'
   """
-  #app.run()
-  app.run(port=8007, debug=True)
+  app.run()
+  #app.run(port=8007, debug=True)
