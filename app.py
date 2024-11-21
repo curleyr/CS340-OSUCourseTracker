@@ -722,14 +722,159 @@ def viewStudents():
   finally:
     cursor.close()
 
+@app.route("/add-student", methods=["POST"])
 def addStudent():
-  pass
+  global mysql_connection
+  try:
+    # Get form data
+    request_data = request.get_json()
 
+    student_id = request_data.get("student_id")
+    first_name = request_data.get("first_name")
+    last_name = request_data.get("last_name")
+
+    if any(parameter is None for parameter in [student_id, first_name, last_name]):
+      return jsonify(message = "Not all required attributes were provided in the request"), 400
+
+    # Close db connection then reopen to avoid caching of data
+    mysql_connection.close()
+    mysql_connection = connectToDB()
+  
+    try:
+      # Check if student ID already exists in database
+      query = """
+        SELECT studentID
+        FROM Students
+        WHERE studentID = %s
+      """
+
+      # Execute query
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_id,))
+      existing_student_id = cursor.fetchall()
+
+      if existing_student_id:
+        return jsonify(message = "A student already exists for the provided student id."), 400
+      
+      # Add student
+      query = """
+      INSERT INTO Students (studentID, firstName, lastName)
+      VALUES (%s, %s, %s)
+      """
+
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_id, first_name, last_name))
+      mysql_connection.commit()
+
+      return jsonify(message = "This student has been added."), 200
+    
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"Database: The following error has occurred: {str(error)}"), 500
+    
+    finally:
+      cursor.close()
+
+  except Exception as error:
+    return jsonify(message = f"Exception: The following error has occurred: {str(error)}"), 500
+
+@app.route("/delete-student", methods=["DELETE"])
 def removeStudent():
-  pass
+  global mysql_connection
+  try:   
+    # Get posted form data
+    request_data = request.get_json()
 
-def updateStudent():
-  pass
+    student_id = request_data.get("student_id")
+
+    # Check DB connection and reconnect if needed
+    mysql_connection = connectToDB()
+    
+    try:
+      query = """
+      DELETE FROM Students
+      WHERE studentID = %s;
+      """
+
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_id,))
+      mysql_connection.commit()
+
+      if cursor.rowcount == 0:
+        return jsonify(message = "No student found with the provided ID."), 404
+
+      return jsonify(message = "The student has been deleted."), 200
+
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+    finally:
+      cursor.close()
+
+  except Exception as error:
+    return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+
+@app.route("/edit-student/<id>", methods=["POST", "GET"])
+def updateStudent(id):
+  global mysql_connection
+  if request.method == "GET":
+    try:
+      # Close db connection then reopen to avoid caching of data
+      mysql_connection.close()
+      mysql_connection = connectToDB()
+
+      query = "SELECT * FROM Students WHERE studentId = %s" % (id)
+      cur = mysql_connection.cursor()
+      cur.execute(query)
+      student = cur.fetchall()
+
+      student = [
+        {
+          "id": row[0],
+          "firstName": row[1],
+          "lastName": row[2],
+        }
+        for row in student
+      ]
+
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+    except Exception as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+  
+    finally:
+      cur.close()
+
+    return render_template("edit_student.j2", student=student)
+    
+  
+  # If user submits form
+  if request.method == "POST":
+    if request.form.get("edit_student"):
+      student_id = request.form["studentID"]
+      first_name = request.form["first_name"]
+      last_name = request.form["last_name"]
+
+      try:
+        # Close db connection then reopen to avoid caching of data
+        mysql_connection.close()
+        mysql_connection = connectToDB()
+
+        query = "UPDATE Students SET firstName = %s, lastName = %s WHERE studentID = %s"
+        cur = mysql_connection.cursor()
+        cur.execute(query, (first_name, last_name, student_id))
+        mysql_connection.commit()
+    
+      except MySQLdb.DatabaseError as error:
+        return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+      
+      except Exception as error:
+        return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+      finally:
+        cur.close()
+  
+      return redirect("/students")
   
 # Listener
 if __name__ == "__main__":

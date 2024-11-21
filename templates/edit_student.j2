@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students</title>
+
+    {# Favicon #}
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" />
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32"
+        href="{{ url_for('static', filename='icons/favicon-32x32.png') }}" />
+    <link rel="icon" type="image/png" sizes="16x16"
+        href="{{ url_for('static', filename='icons/favicon-16x16.png') }}" />
+    <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}" />
+
+</head>
+
+
+<body>
+
+    <header>
+        <h1>Students</h1>
+    </header>
+
+    {# Navigation Bar #}
+    <nav>
+        <ul>
+            <li><a href="/index">Index</a></li>
+            <li><a href="/courses">Courses & Prerequisites</a></li>
+            <li><a href="/terms">Terms</a></li>
+            <li><a href="/student-term-plans">Student Term Plans</a></li>
+            <li><a href="/students">Students</a></li>
+        </ul>
+    </nav>
+
+    <main>
+
+        {# Update/Edit Student Section #}
+        <section id="edit_student_section">
+            <h3>Edit Student Information</h3>
+            <form id="edit_student_form" action="/edit-student/{{ student[0]['id'] }}" method="post"
+                style="border: 1px solid black; padding: 15px;">
+                {# Hidden form input for id for easy POST access #}
+                <input type="hidden" value="{{student[0]['id']}}" id="studentID" name="studentID">
+
+                {# Student First Name #}
+                <label for="first_name">First Name</label>
+                <input type="text" name="first_name" id="first_name" aria-label="Student First Name" required
+                    value="{{student[0]['firstName']}}">
+                <br>
+                {# Student Last Name #}
+                <label for="last_name">Last Name</label>
+                <input type="text" name="last_name" id="last_name" aria-label="Student Last Name" required
+                    value="{{student[0]['lastName']}}"> <br>
+
+                {# Submit and Cancel Buttons #}
+                <input type="submit" value="Edit Student" name="edit_student" style="margin:0.5rem;"><br>
+                <a href="/students"><button id="cancel_edit_student_button" type="button">Cancel</button></a>
+            </form>
+
+
+    </main>
+
+</body>
+
+</html>

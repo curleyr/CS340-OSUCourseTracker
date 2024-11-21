@@ -10,10 +10,133 @@
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" />
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
   <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}" />
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}" />  
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}" />
   <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}" />
 
+  <script>
+    // /////////// //
+    // FUNCTION    //
+    // PAGE TOGGLE //
+    // /////////// //
+    // Handle toggling page from viewing students to other forms
+    function toggleStudentForm(section_to_display, reload = false) {
+      if (reload) {
+        location.reload()
+        return
+      }
+
+      const sections = [
+        "view_students_section",
+        "add_student_section"
+      ]
+
+      for (const section of sections) {
+        if (section === section_to_display) {
+          document.getElementById(section).style.display = "block"
+        } else {
+          document.getElementById(section).style.display = "none"
+        }
+      }
+    }
+
+    // /////////// //
+    // FUNCTION    //
+    // ADD STUDENT //
+    // /////////// //
+    async function addStudent(event) {
+      // Prevent page from refreshing
+      event.preventDefault();
+
+      // Instantiate FormData object
+      const formData = new FormData(event.target);
+      // Initialize data object. This will be built below
+      const data = {};
+
+      // Iterate through each key value pair from formData
+      formData.forEach((value, key) => {
+        data[key] = value;
+      });
+      // Logging to console for debugging purposes
+      console.log(data);
+
+      // Call Flask route to add student
+      const response = await fetch(
+        "/add-student", {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "POST",
+        body: JSON.stringify(data)
+      }
+      )
+
+      const message = await response.json();
+      console.log(JSON.stringify(message));
+
+      // Display confirmation/error popup on screen
+      window.alert(message["message"].replace('"', ''));
+
+      // Successful Response
+      if (response.status == 200) {
+        toggleStudentForm("view_students_section", reload = true)
+      }
+    }
+
+    // ////////////// //
+    // FUNCTION       //
+    // DELETE STUDENT //
+    // ////////////// //
+    async function deleteStudent(event, student_id, button_element) {
+      // Prevent page from refreshing
+      event.preventDefault();
+
+      console.log(student_id)
+
+      // Display a confirmation popup
+      if (!confirm("Are you sure you want to delete this student?")) {
+        return
+      }
+
+      // Call Flask route to delete student
+      const response = await fetch(
+        "/delete-student", {
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "DELETE",
+        body: JSON.stringify({ "student_id": student_id })
+      }
+      )
+
+      const message = await response.json();
+      console.log(JSON.stringify(message));
+
+      // Display confirmation/error popup on screen
+      window.alert(message["message"].replace('"', ''));
+
+      // Successful Response
+      if (response.status == 200) {
+
+        // Get the parent <tr> element and remove it after term plan has been deleted
+        const tr_element = button_element.closest("tr");
+        if (tr_element) {
+          tr_element.remove()
+        } else {
+          console.error("Couldn't remove the table row")
+        }
+      }
+    }
+
+
+    // Add listeners
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("add_student_form").onsubmit = addStudent;
+    })
+
+  </script>
+
 </head>
+
 
 <body>
 
@@ -35,9 +158,10 @@
   <main>
 
     {# View All Students Section #}
-    <section id="view_students_section">
+    <section id="view_students_section" style="display: block;">
       <h3>View All Students</h3>
-      <button ID="add_students_button" type="button">Add New Student</button>
+      <button ID="add_student_button" type="button" onclick="toggleStudentForm('add_student_section')">Add New
+        Student</button>
       <table border="1">
         <tr>
           <th>OSU ID Number</th>
@@ -51,16 +175,17 @@
           <td>{{ student["id"] }}</td>
           <td>{{ student["firstName"] }}</td>
           <td>{{ student["lastName"] }}</td>
-          <td><button id="edit_student_button" type="button">Edit</button></td>
-          <td><button id="delete_student_button" type="button">Delete</button></td>
+          <td><a href="edit-student/{{ student['id'] }}"><button id="edit_student_button"
+                type="button">Edit</button></a></td>
+          <td><button id="delete_student_button" type="button"
+              onclick="deleteStudent(event, '{{ student['id'] }}', this)">Delete</button></td>
         </tr>
         {% endfor %}
       </table>
     </section>
 
     {# Add New Student Section #}
-    {# TODO remove temp <hr> tag below once form is dynamically shown for final submission #}
-    <hr><section id="add_student_section">
+    <section id="add_student_section" style="display: none;">
       <h3>Add New Student</h3>
       <form id="add_student_form" style="border: 1px solid black; padding: 15px;">
         {# Student OSU ID Number #}
@@ -76,42 +201,11 @@
 
         {# Submit and Cancel Buttons #}
         <button id="submit_add_student_button" type="submit">Submit</button><br>
-        <button id="cancel_add_student_button" type="button">Cancel</button>
+        <button id="cancel_add_student_button" type="button"
+          onclick="toggleStudentForm('view_students_section')">Cancel</button>
       </form>
     </section>
 
-    {# Update/Edit Student Section #}
-    {# TODO remove temp <hr> tag below once form is dynamically shown for final submission #}
-    <hr><section id="edit_student_section">
-      <h3>Edit Student Information</h3>
-      {# TODO: Make this dynamically show the student being edited. This is currently hard coded #}
-      <form id="edit_student_form" style="border: 1px solid black; padding: 15px;">
-        {# Student First Name #}
-        <label for="first_name">First Name</label>
-        <input type="text" name="first_name" id="first_name" aria-label="Student First Name" required value="April">
-        <br>
-        {# Student Last Name #}
-        <label for="last_name">Last Name</label>
-        <input type="text" name="last_name" id="last_name" aria-label="Student Last Name" required value="Wang"> <br>
-
-        {# Submit and Cancel Buttons #}
-        <button id="submit_edit_student_button" type="submit">Edit Student</button><br>
-        <button id="cancel_edit_student_button" type="button">Cancel</button>
-      </form>
-
-      {# Delete Student Section #}
-      {# TODO remove temp <hr> tag below once form is dynamically shown for final submission #}
-      <hr><section id="delete_student_section">
-        <h3>Delete Student from Database</h3>
-        <form id="delete_student_form" style="border: 1px solid black; padding: 15px;">
-          <p>Are you sure you want to delete the following student?</p>
-          {# TODO: Make this dynamically show the student being deleted. This is currently hard coded #}
-          <p>April Wang</p>
-
-          <button id="submit_edit_student_button" type="submit">Yes, Delete Student</button><br>
-          <button id="cancel_edit_student_button" type="button">Cancel</button>
-        </form>
-      </section>
 
   </main>
 

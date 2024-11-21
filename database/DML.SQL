@@ -146,7 +146,7 @@
 
     -- INSERT new student
     INSERT INTO Students (studentID, firstName, lastName)
-    VALUES (:studentID, :firstName, :lastName);
+    VALUES (:studentID_From_Input, :firstName_From_Input, :lastName_From_Input);
 
     -- DELETE student
     DELETE FROM Students
