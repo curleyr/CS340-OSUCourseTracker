@@ -221,7 +221,6 @@
             <th>Delete</th>
           </tr>
       `
-
       // Build Current Course column value
       for (let index in courses_array) {
         edit_section_html += `
@@ -306,14 +305,25 @@
     async function updateStudentTermPlanCourse(event, student_term_plan_id, course_id, button_element) {
       // Prevent page from refreshing
       event.preventDefault();
+      console.log(course_id);
+
+      // Get new course ID from value of closest select option
+      const new_course_id = button_element.closest("tr").querySelector("select").value;
+
+      // Get row being deleted and table element
+      const tr_element = button_element.closest("tr");
+      const table = tr_element.closest("table");
+
+      // Check if attempting to mark last row as 'None'
+      if (new_course_id === "None" && table.querySelectorAll("tr:not(:first-child)").length === 1) {
+        window.alert("You can't mark the last course on a student term plan as 'None' as each plan must have a minimum of 1 course.");
+        return;
+      }
 
       // Display a confirmation popup
       if (!confirm("Are you sure you want to update this course?")) {
         return
       }
-
-      // Get new course ID from value of closest select option
-      const new_course_id = button_element.closest("tr").querySelector("select").value;
       
       // Call Flask route to update student term plan course
       const response = await fetch(
