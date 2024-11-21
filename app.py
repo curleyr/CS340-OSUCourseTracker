@@ -777,20 +777,41 @@ def addStudent():
   except Exception as error:
     return jsonify(message = f"Exception: The following error has occurred: {str(error)}"), 500
 
-@app.route("/delete-student/<str:id>", methods=["DELETE"])
-def removeStudent(id):
+@app.route("/delete-student/", methods=["DELETE"])
+def removeStudent():
   global mysql_connection
-  
-  query = """
-  DELETE FROM Students
-  WHERE studentID = %s;
-  """
+  try:   
+    # Get posted form data
+    request_data = request.get_json()
 
-  cursor = mysql_connection.cursor()
-  cursor.execute(query, (id,))
-  mysql_connection.commit()
+    student_id = request_data.get("student_id")
 
-  return redirect("/students")
+    # Check DB connection and reconnect if needed
+    mysql_connection = connectToDB()
+    
+    try:
+      query = """
+      DELETE FROM Students
+      WHERE studentID = %s;
+      """
+
+      cursor = mysql_connection.cursor()
+      cursor.execute(query, (student_id,))
+      mysql_connection.commit()
+
+      if cursor.rowcount == 0:
+        return jsonify(message = "No student found with the provided ID."), 404
+
+      return jsonify(message = "The student has been deleted."), 200
+
+    except MySQLdb.DatabaseError as error:
+      return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+    
+    finally:
+      cursor.close()
+
+  except Exception as error:
+    return jsonify(message = f"The following error has occurred: {str(error)}"), 500
 
 def updateStudent():
   pass

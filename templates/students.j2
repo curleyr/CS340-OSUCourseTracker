@@ -28,8 +28,7 @@
       const sections = [
         "view_students_section",
         "add_student_section",
-        "edit_student_section",
-        "delete_student_section"
+        "edit_student_section"
       ]
 
       for (const section of sections) {
@@ -92,6 +91,8 @@
       // Prevent page from refreshing
       event.preventDefault();
 
+      console.log(student_id)
+
       // Display a confirmation popup
       if (!confirm("Are you sure you want to delete this student?")) {
         return
@@ -99,7 +100,7 @@
 
       // Call Flask route to delete student
       const response = await fetch(
-        `/delete-student`, {
+        "/delete-student", {
         headers: {
           "Content-Type": "application/json"
         },
@@ -176,8 +177,8 @@
           <td>{{ student["firstName"] }}</td>
           <td>{{ student["lastName"] }}</td>
           <td><button id="edit_student_button" type="button">Edit</button></td>
-          <td><a href="delete-student/{{student.id}}"><button id="delete_student_button"
-                type="button">Delete</button></a></td>
+          <td><button id="delete_student_button" type="button"
+              onclick="deleteStudent(event, '{{ student['id'] }}', this)">Delete</button></td>
         </tr>
         {% endfor %}
       </table>
@@ -223,20 +224,6 @@
         <button id="cancel_edit_student_button" type="button"
           onclick="toggleStudentForm('view_students_section')">Cancel</button>
       </form>
-
-      {# Delete Student Section #}
-      <section id="delete_student_section" style="display: none;">
-        <h3>Delete Student from Database</h3>
-        <form id="delete_student_form" style="border: 1px solid black; padding: 15px;">
-          <p>Are you sure you want to delete the following student?</p>
-          {# TODO: Make this dynamically show the student being deleted. This is currently hard coded #}
-          <p>April Wang</p>
-
-          <button id="submit_edit_student_button" type="submit">Yes, Delete Student</button><br>
-          <button id="cancel_edit_student_button" type="button"
-            onclick="toggleStudentForm('view_students_section')">Cancel</button>
-        </form>
-      </section>
 
   </main>
 
