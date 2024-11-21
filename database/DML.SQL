@@ -26,12 +26,12 @@
       c.courseID,
       CONCAT(c.code, ' ', c.name) AS course,
       c.credit,  
-      GROUP_CONCAT((SELECT CONCAT(code, ' ', name) FROM Courses WHERE courseID = pc.courseID) ORDER BY pc.courseID SEPARATOR ', ') AS prerequisites 
-      FROM Courses c 
+      GROUP_CONCAT(CONCAT(pc.code, ' ', pc.name) ORDER BY pc.code SEPARATOR ', ') AS prerequisites 
+    FROM Courses c
     LEFT JOIN Courses_has_Prerequisites p   
       ON c.courseID = p.courseID 
     LEFT JOIN Courses pc  
-      ON p.prerequisiteCourseID = pc.courseID 
+      ON p.prerequisiteID = pc.courseID 
     GROUP BY c.courseID 
     ORDER BY c.code ASC;
 
@@ -42,7 +42,7 @@
 
     -- Then can also insert prerequisite for each prerequisite checkbox submitted on form
     INSERT INTO Courses_has_Prerequisites (courseID, prerequisiteCourseID)
-    VALUES ((SELECT courseID FROM Courses WHERE name = :nameInput), :prerequisiteCourseID_From_Checkbox_Input);
+    VALUES ((SELECT courseID FROM Courses WHERE code = :codeInput), :prerequisiteCourseID_From_Checkbox_Input);
 
   -- ---------------------------------------------------------
   -- TERMS PAGE
@@ -54,8 +54,8 @@
       t.*, 
       GROUP_CONCAT(CONCAT(c.code, ' ', c.name) ORDER BY c.courseID ASC SEPARATOR ', ') AS courses
     FROM Terms t
-    INNER JOIN Terms_has_Courses thc ON t.termID = thc.termID
-    INNER JOIN Courses c ON thc.courseID = c.courseID
+    LEFT JOIN Terms_has_Courses thc ON t.termID = thc.termID
+    LEFT JOIN Courses c ON thc.courseID = c.courseID
     GROUP BY t.termID
     ORDER BY t.startDate ASC;
 
@@ -127,9 +127,9 @@
     VALUES ((SELECT studentTermPlanID FROM StudentTermPlans WHERE studentID = :studentID_From_Dropdown_Input AND termID = :termID_From_Dropdown_Input), :courseID_From_Checkbox_Input);
 
     -- For Updating row of StudentTermPlans_has_Courses (courseID can be updated to NULL)
-    UPDATE  StudentTermPlans_has_Courses (studentTermPlanCourseID, courseID)
+    UPDATE  StudentTermPlans_has_Courses
     SET courseID = :courseID_from_Dropdown_input
-    WHERE studentTermPlanCourseID = :studentTermPlanCourseID_passed_into_update_component;
+    WHERE studentTermPlanCourseID = (SELECT studentTermPlanCourseID FROM StudentTermPlans_has_Courses WHERE studentTermPlanID = :studentID_From_Dropdown_Input AND courseID = :courseID_From_Checkbox_Input)
 
     -- For Deleting row of StudentTermPlans_has_Courses
     DELETE FROM StudentTermPlans_has_Courses
