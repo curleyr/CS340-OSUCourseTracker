@@ -186,7 +186,7 @@
       let edit_section_html = `
         <h2>${term_name} Plan for ${student_name}</h2>
         <h3>Update or Delete Course</h3>
-        <button id="cancel_edit_student_term_plan_courses_section" type="button" onclick="toggleStudentTermPlanForm('view_student_term_plans_section', reload=true)">Cancel</button>
+        <button id="cancel_edit_student_term_plan_courses_section" type="button" onclick="toggleStudentTermPlanForm('view_student_term_plans_section', reload=true)">Cancel</button> <br> <br>
         <table border="1">
           <tr>
             <th>Current Course</th>
@@ -226,7 +226,7 @@
         edit_section_html += `
             </select>
             </td>
-            <td><button id="submit_student_term_plan_courses_edit_button" type="button" onclick="updateStudentTermPlanCourse(event, ${student_term_plan_id}, ${course_id}, this)">Submit</button></td>
+            <td><button id="submit_student_term_plan_courses_edit_button" class="button--call-to-action" type="button" onclick="updateStudentTermPlanCourse(event, ${student_term_plan_id}, ${course_id}, this)">Submit</button></td>
             <td><button id="delete_student_term_plan_course_button" type="button" onclick="deleteStudentTermPlanCourse(event, ${student_term_plan_id}, ${course_id}, this)">Delete</button></td>
           </tr>
         `
@@ -236,7 +236,7 @@
       </table>
       
       <h3>Add Course</h3>
-      <button id="cancel_edit_student_term_plan_courses_section" type="button" onclick="toggleStudentTermPlanForm('view_student_term_plans_section', reload=true)">Cancel</button>
+      <button id="cancel_edit_student_term_plan_courses_section" type="button" onclick="toggleStudentTermPlanForm('view_student_term_plans_section', reload=true)">Cancel</button>  <br> <br>
       <table border="1">
         <tr>
           <th>New Course</th>
@@ -261,7 +261,7 @@
       edit_section_html += `
             </select>
             </td>
-            <td><button type="button" onclick="addStudentTermPlanCourse(event, ${student_term_plan_id}, this)">Submit</button></td>
+            <td><button type="button" class="button--call-to-action" onclick="addStudentTermPlanCourse(event, ${student_term_plan_id}, this)">Submit</button></td>
           </tr>
         `
       edit_section_html += "</table>";
@@ -361,7 +361,7 @@
   {# View All Term Plans Section #}
   <section id="view_student_term_plans_section" style="display: block;">
     <h3>View All Student Term Plans</h3>
-    <button id="add_student_term_plan_button" type="button" onclick="toggleStudentTermPlanForm('add_student_term_plan_section')">Add New Student Term Plan</button>
+    <button id="add_student_term_plan_button" type="button" class="button--call-to-action" onclick="toggleStudentTermPlanForm('add_student_term_plan_section')">Add New Student Term Plan</button> <br> <br>
     <table border="1">
       <tr>
         <th>Plan ID</th>
@@ -440,8 +440,10 @@
       {% endfor %}
 
       {# Submit and Cancel Buttons #}
-      <button id="submit_add_student_term_plan_button" type="submit">Submit</button><br>
-      <button id="cancel_add_student_term_plan_button" type="button" onclick="toggleStudentTermPlanForm('view_student_term_plans_section')">Cancel</button>
+      <div class="buttons__group">
+        <button id="submit_add_student_term_plan_button" class="button--call-to-action" type="submit">Submit</button><br>
+        <button id="cancel_add_student_term_plan_button" type="button" onclick="toggleStudentTermPlanForm('view_student_term_plans_section')">Cancel</button>
+      </div>
     </form>
   </section>
 
