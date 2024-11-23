@@ -303,6 +303,43 @@ def addTerm():
   except Exception as error:
     return jsonify(message = f"The following error has occurred: {str(error)}"), 500
 
+@app.route("/add-term-course", methods=["PATCH"])
+def addTermCourse():
+  global mysql_connection
+  try:
+    # Get posted form data
+    request_data = request.get_json()
+
+    term_id = request_data.get("term_id")
+    new_course_id = request_data.get("new_course_id")
+
+    # Check DB connection and reconnect if needed
+    mysql_connection = connectToDB()
+
+    query = """
+      INSERT INTO Terms_has_Courses (termID, courseID)
+      VALUES (%s, %s)
+    """
+        
+    # Execute query
+    cursor = mysql_connection.cursor()
+    cursor.execute(query, (term_id, new_course_id))
+    mysql_connection.commit()
+
+    if cursor.rowcount == 0:
+      return jsonify(message = "No term found with the provided ID."), 404
+
+    return jsonify(message = f"The course has been added."), 200
+
+  except MySQLdb.DatabaseError as error:
+    return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+  
+  except Exception as error:
+    return jsonify(message = f"The following error has occurred: {str(error)}"), 500
+
+  finally:
+    cursor.close()
+
 # ////////////////// #
 # STUDENT TERM PLANS #
 # ///////////////////#
