@@ -1,18 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Courses</title>
-
-  {# Favicon #}
-  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" />
-  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}" />
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}" />  
-  <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}" />
-
+{% extends "base.j2" %}
+{% block title %}Courses{% endblock %}
+{% block script %}
   <script>
     // //////// //
     // FUNCTION //
@@ -98,94 +86,69 @@
     document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("add_course_form").onsubmit = addCourse;
     })
-
   </script>
+{% endblock %}
+{% block header %}Courses{% endblock %}
+{% block main %}
+  {# View All Course Section #}
+  <section id="view_courses_section" style="display: block;">
+    <h3>View All Courses & Prerequisites</h3>
+    <button id="add_course_button" type="button" onclick="toggleCourseForm('add_course_section')">Add New Course</button>
+    <table border="1">
+      <tr>
+        <th>ID</th>
+        <th>Course</th>
+        <th>Credit</th>
+        <th>Prerequisites</th>
+      </tr>
+      {% for course in courses %}
+      <tr>
+        <td>{{ course["id"] }}</td>
+        <td>{{ course["course"] }}</td>
+        <td>{{ course["credit"] }}</td>
+        <td>
+          {% if course["prerequisites"] %}
+            {{ course["prerequisites"].replace(', ', ', <br>')|safe }}
+          {% else %}
+            None
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
 
-</head>
+  {# Add New Course Section #}
+  <section id="add_course_section" style="display: none;">
+    <h3>Add New Course</h3>
+    <form id="add_course_form" style="border: 1px solid black; padding: 15px;">
+      {# Course Code #}
+      <label for="course_code">Code</label><br>
+      <input type="text" id="course_code" name="course_code" aria-label="Code" required /><br>
 
-<body>
+      <label for="course_name">Name</label><br>
+      <input type="text" id="course_name" name="course_name" aria-label="Name" required /><br>
 
-  <header>
-    <h1>Courses</h1>
-  </header>
+      <label for="course_credit">Credit</label><br>
+      <select name="course_credit" id="course_credit" aria-label="Credit" required>
+        <option value="" disabled selected>Select credit</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select><br>
 
-  {# Navigation Bar #}
-  <nav>
-    <ul>
-      <li><a href="/index">Index</a></li>
-      <li><a href="/courses">Courses & Prerequisites</a></li>
-      <li><a href="/terms">Terms</a></li>
-      <li><a href="/student-term-plans">Student Term Plans</a></li>
-      <li><a href="/students">Students</a></li>
-    </ul>
-  </nav>
+      {# Prerequisites #}
+      <p>Prerequisites</p>
+      {% for course in courses %}
+      <label>
+        <input type="checkbox" name="prerequisite_course_ids" value={{ course["id"] }}> {{ course["course"] }}
+      </label><br>
+      {% endfor %}
 
-  <main>
-
-    {# View All Course Section #}
-    <section id="view_courses_section" style="display: block;">
-      <h3>View All Courses & Prerequisites</h3>
-      <button id="add_course_button" type="button" onclick="toggleCourseForm('add_course_section')">Add New Course</button>
-      <table border="1">
-        <tr>
-          <th>ID</th>
-          <th>Course</th>
-          <th>Credit</th>
-          <th>Prerequisites</th>
-        </tr>
-        {% for course in courses %}
-        <tr>
-          <td>{{ course["id"] }}</td>
-          <td>{{ course["course"] }}</td>
-          <td>{{ course["credit"] }}</td>
-          <td>
-            {% if course["prerequisites"] %}
-              {{ course["prerequisites"].replace(', ', ', <br>')|safe }}
-            {% else %}
-              None
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
-    </section>
-
-    {# Add New Course Section #}
-    <section id="add_course_section" style="display: none;">
-      <h3>Add New Course</h3>
-      <form id="add_course_form" style="border: 1px solid black; padding: 15px;">
-        {# Course Code #}
-        <label for="course_code">Code</label><br>
-        <input type="text" id="course_code" name="course_code" aria-label="Code" required /><br>
-
-        <label for="course_name">Name</label><br>
-        <input type="text" id="course_name" name="course_name" aria-label="Name" required /><br>
-
-        <label for="course_credit">Credit</label><br>
-        <select name="course_credit" id="course_credit" aria-label="Credit" required>
-          <option value="" disabled selected>Select credit</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-        </select><br>
-
-        {# Prerequisites #}
-        <p>Prerequisites</p>
-        {% for course in courses %}
-        <label>
-          <input type="checkbox" name="prerequisite_course_ids" value={{ course["id"] }}> {{ course["course"] }}
-        </label><br>
-        {% endfor %}
-
-        {# Submit and Cancel Buttons #}
-        <button id="submit_add_course_button" type="submit">Submit</button><br>
-        <button id="cancel_add_course_button" type="button" onclick="toggleCourseForm('view_courses_section')">Cancel</button>
-      </form>
-    </section>
-
-  </main>
-
-</body>
-
-</html>
+      {# Submit and Cancel Buttons #}
+      <button id="submit_add_course_button" type="submit">Submit</button><br>
+      <button id="cancel_add_course_button" type="button" onclick="toggleCourseForm('view_courses_section')">Cancel</button>
+    </form>
+  </section>
+{% endblock %}
