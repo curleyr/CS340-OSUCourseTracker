@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, render_template, redirect
 from database.DatabaseManager import DatabaseManager
 from database.QueryManager import QueryManager
+from operator import itemgetter
 
 # Define blueprint
 routes_blueprint = Blueprint('routes', __name__)
@@ -25,11 +26,8 @@ def viewCourses():
   
 @routes_blueprint.route("/add-course", methods=["POST"])
 def addCourse():
-  request_data = request.get_json()
-  course_code = request_data.get("course_code")
-  course_credit = request_data.get("course_credit")
-  course_name = request_data.get("course_name")
-  prerequisite_course_ids = request_data.get("prerequisite_course_ids", [])
+  course_code, course_credit, course_name = itemgetter("course_code", "course_credit", "course_name")(request.get_json())
+  prerequisite_course_ids = request.get_json().get("prerequisite_course_ids", [])
 
   if any(parameter is None for parameter in [course_code, course_credit, course_name]):
     return jsonify(message = "Not all required attributes were provided in the request"), 400
@@ -60,12 +58,8 @@ def viewTerms():
 @routes_blueprint.route("/add-term", methods=["POST"])
 def addTerm():
   # Get posted form data
-  request_data = request.get_json()
-  term_season = request_data.get("term_season")
-  term_year = request_data.get("term_year")
-  term_start_date = request_data.get("term_start_date")
-  term_end_date = request_data.get("term_end_date")
-  term_course_ids = request_data.get("term_course_ids", [])
+  term_season, term_year, term_start_date, term_end_date = itemgetter("term_season", "term_year", "term_start_date", "term_end_date")(request.get_json())
+  term_course_ids = request.get_json().get("term_course_ids", [])
 
   if any(parameter is None for parameter in [term_season, term_year, term_start_date, term_end_date]):
     return jsonify(message = "Not all required attributes were provided in the request"), 400
@@ -74,10 +68,8 @@ def addTerm():
   if qm._terms.get(term_season, term_year):
     return jsonify(message = f"A term with the name of {term_season} {term_year} already exists"), 400
 
-  # Add term
   qm._terms.create(term_season, term_year, term_start_date, term_end_date)
 
-  # Iterate through term course ids and insert into Terms_has_Courses
   for term_course_id in term_course_ids:
     qm._terms.add_course(term_season=term_season, term_year=term_year, term_course_id=term_course_id)
 
@@ -86,13 +78,9 @@ def addTerm():
 @routes_blueprint.route("/add-term-course", methods=["PATCH"])
 def addTermCourse():
   # Get posted form data
-  request_data = request.get_json()
-  term_id = request_data.get("term_id")
-  new_course_id = request_data.get("new_course_id")
+  term_id, new_course_id = itemgetter("term_id", "new_course_id")(request.get_json())
 
-  # Add course
   qm._terms.add_course(term_id=term_id, term_course_id=new_course_id)
-
   return jsonify(message = f"The course has been added."), 200
   
 @routes_blueprint.route("/student-term-plans", methods=["GET"])
@@ -110,11 +98,7 @@ def viewStudentTermPlans():
 @routes_blueprint.route("/add-student-term-plan", methods=["POST"])
 def addStudentTermPlan():
   # Get posted form data
-  request_data = request.get_json()
-  student_id = request_data.get("student_id")
-  term_id = request_data.get("term_id")
-  advisor_approved = request_data.get("advisor_approved")
-  courses = request_data.get("courses")
+  student_id, term_id, advisor_approved, courses = itemgetter("student_id", "term_id", "advisor_approved", "courses")(request.get_json())
 
   if any(parameter is None for parameter in [student_id, term_id, advisor_approved, courses]):
     return jsonify(message = "Not all required attributes were provided in the request"), 400
@@ -123,8 +107,8 @@ def addStudentTermPlan():
   if qm._studentTermPlans.get(student_id, term_id):
     return jsonify(message = "A student term plan already exists for the provided student and term."), 400
 
-  qm._studentTermPlans.create(student_id, term_id, advisor_approved)                                # Add student term plan
-  qm._studentTermPlans.add_courses(student_id=student_id, term_id=term_id, courses=courses)      # Add courses 
+  qm._studentTermPlans.create(student_id, term_id, advisor_approved)    
+  qm._studentTermPlans.add_courses(student_id=student_id, term_id=term_id, courses=courses)
 
   return jsonify(message = f"The student term plan and associated course(s) has been added."), 200
 
@@ -138,11 +122,9 @@ STRING_NONE = "None"
 @routes_blueprint.route("/edit-student-term-plan", methods=["PATCH"])
 def editStudentTermPlan():
   # Get posted form data
-  request_data = request.get_json()
-  student_term_plan_id = request_data.get("student_term_plan_id")
-  course_id = request_data.get("course_id")
-  new_course_id = request_data.get("new_course_id")
-  action = request_data.get("action")
+  student_term_plan_id, action, bobby = itemgetter("student_term_plan_id", "action", "bobby")(request.get_json())
+  course_id = request.get_json().get("course_id")
+  new_course_id = request.get_json().get("new_course_id")
 
   if new_course_id == STRING_NONE:
     new_course_id = None
@@ -159,21 +141,15 @@ def editStudentTermPlan():
 
 @routes_blueprint.route("/delete-student-term-plan/<int:student_term_plan_id>", methods=["DELETE"])
 def deleteStudentTermPlan(student_term_plan_id):
-  # Delete student term plan
   qm._studentTermPlans.delete(student_term_plan_id)
-  
   return jsonify(message = "The student term plan has been deleted."), 200
 
 @routes_blueprint.route("/delete-student-term-plan-course", methods=["DELETE"])
 def deleteStudentTermPlanCourse():
   # Get posted form data
-  request_data = request.get_json()
-  student_term_plan_id = request_data.get("student_term_plan_id")
-  course_id = request_data.get("course_id")
+  student_term_plan_id, course_id = itemgetter("student_term_plan_id", "course_id")(request.get_json())
 
-  # Delete student term plan course
   qm._studentTermPlans.remove_course(student_term_plan_id, course_id)
-  
   return jsonify(message = "The student course plan course has been deleted."), 200
 
 @routes_blueprint.route("/students", methods=["GET"])
@@ -181,58 +157,43 @@ def viewStudents():
   # Close db connection to avoid caching of data
   dm.close_connection()
 
-  # Retrieve all students from 'Students' table
-  students = qm._students.all()
-  print(students)
-  
+  students = qm._students.all()  
   return render_template("students.j2", students=students)
   
 @routes_blueprint.route("/add-student", methods=["POST"])
 def addStudent():
   # Get posted form data
-  request_data = request.get_json()
-  student_id = request_data.get("student_id")
-  first_name = request_data.get("first_name")
-  last_name = request_data.get("last_name")
+  student_id, first_name, last_name = itemgetter("student_id", "first_name", "last_name")(request.get_json())
 
   if any(parameter is None for parameter in [student_id, first_name, last_name]):
     return jsonify(message = "Not all required attributes were provided in the request"), 400
   
-  # Check if student ID already exists in database
+  # Check if student already exists in database
   if qm._students.get(student_id):
     return jsonify(message = "A student already exists for the provided student id."), 400
 
-  # Add student
   qm._students.create(student_id, first_name, last_name)
-
   return jsonify(message = "This student has been added."), 200
 
 @routes_blueprint.route("/delete-student", methods=["DELETE"])
 def removeStudent():
   # Get posted form data
-  request_data = request.get_json()
-  student_id = request_data.get("student_id")
+  student_id = request.get_json().get("student_id")
 
-  # Delete student
   qm._students.delete(student_id)
-
   return jsonify(message = "The student has been deleted."), 200
 
 @routes_blueprint.route("/edit-student/<id>", methods=["POST", "GET"])
 def updateStudent(id):
   if request.method == "GET":
     student = qm._students.get(id)
-
     return render_template("edit_student.j2", student=student)
   
   # If user submits form
   if request.method == "POST":
     if request.form.get("edit_student"):
-      student_id = request.form["studentID"]
-      first_name = request.form["first_name"]
-      last_name = request.form["last_name"]
+      student_id, first_name, last_name = itemgetter("studentID", "first_name", "last_name")(request.form)
 
-      # Update student
       qm._students.update(first_name, last_name, student_id)
     
       return redirect("/students")

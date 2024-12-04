@@ -30,6 +30,10 @@ def handleDatabaseError(error):
 def handleHTTPException(error):
   return render_template("exception.j2", error_name = error.name, error_description = error.description), error.code
 
+@error_handlers_blueprint.app_errorhandler(KeyError)
+def handleKeyError(error):
+  return jsonify({"error": "KeyError occurred", "message": f"A key with the name of '{error.args[0]}' was accessed but does not exist."}), 400
+
 @error_handlers_blueprint.app_errorhandler(Exception)
 def handleGenericException(error):
   return jsonify({"error": "Unexpected error occurred", "message": str(error)}), 500
