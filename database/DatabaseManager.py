@@ -1,15 +1,10 @@
 import MySQLdb
+from blueprints.errorHandlers import DatabaseError
 from dotenv import load_dotenv
 import os
 
 # Load environment variables from .env file
 load_dotenv()
-
-class DatabaseError(Exception):
-  """
-  Custom exception class for database errors
-  """
-  pass
 
 class DatabaseManager:
   """
