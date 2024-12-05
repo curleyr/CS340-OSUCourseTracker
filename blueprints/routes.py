@@ -47,10 +47,7 @@ def viewTerms():
   # Close db connection to avoid caching of data
   dm.close_connection()
 
-  # Retrieve all terms from 'Terms' table
   terms = qm._terms.all()
-  
-  # Retrieve all courses from 'Courses' table
   courses = qm._courses.all()
 
   return render_template("terms.j2", terms=terms, courses=courses)
@@ -122,7 +119,7 @@ STRING_NONE = "None"
 @routes_blueprint.route("/edit-student-term-plan", methods=["PATCH"])
 def editStudentTermPlan():
   # Get posted form data
-  student_term_plan_id, action, bobby = itemgetter("student_term_plan_id", "action", "bobby")(request.get_json())
+  student_term_plan_id, action = itemgetter("student_term_plan_id", "action")(request.get_json())
   course_id = request.get_json().get("course_id")
   new_course_id = request.get_json().get("new_course_id")
 
