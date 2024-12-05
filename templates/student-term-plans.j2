@@ -1,23 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Term Plans</title>
-
-  {# Favicon #}
-  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" />
-  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}" />
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}" />  
-  <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}" />
-
+{% extends "base.j2" %}
+{% block title %}Student Term Plans{% endblock %}
+{% block script %}
   <script>
-    // /////////// //
-    // FUNCTION    //
-    // PAGE TOGGLE //
-    // /////////// //
     // Handle toggling section displays
     function toggleStudentTermPlanForm(section_to_display, reload=false) {
       if(reload) {
@@ -40,10 +24,6 @@
       }
     }
 
-    // ///////////////////// //
-    // FUNCTION              //
-    // ADD STUDENT TERM PLAN //
-    // ///////////////////// //
     // Handle adding a student term plan
     async function addStudentTermPlan(event) {
       // Prevent page from refreshing
@@ -51,6 +31,12 @@
 
       // Instantiate FormData object
       const formData = new FormData(event.target);
+
+      // Check to ensure at least one course has been selected
+      if (!formData.has("courses")) {
+        window.alert("At least 1 course needs to be selected to create a student term plan.");
+        return;
+      }
       // Initialize data object. This will be built below
       const data = {};
 
@@ -96,10 +82,6 @@
       } 
     }
 
-    // //////////////////////// //
-    // FUNCTION                 //
-    // DELETE STUDENT TERM PLAN //
-    // //////////////////////// //
     // Handle deleting a student term plan
     async function deleteStudentTermPlan(event, student_term_plan_id, button_element) {
       // Prevent page from refreshing
@@ -136,10 +118,6 @@
       } 
     }
 
-    // /////////////////////////////// //
-    // FUNCTION                        //
-    // DELETE STUDENT TERM PLAN COURSE //
-    // /////////////////////////////// //
     // Handle deleting a student term plan course
     async function deleteStudentTermPlanCourse(event, student_term_plan_id, course_id, button_element) {
       // Prevent page from refreshing
@@ -190,10 +168,6 @@
       } 
     }
 
-    // ////////////////////////////////////// //
-    // FUNCTION                               //
-    // BUILD UPDATE STUDENT TERM PLAN SECTION //
-    // ////////////////////////////////////// //
     // Handle building the student term plan section and toggling display of it to on
     function buildUpdateStudentTermPlanSection(event, student_term_plan_id, student_name, term_name, courses) {
       // Prevent page from refreshing
@@ -240,14 +214,14 @@
           const is_current_course = courses_array.includes(course_object["course"]);
           
           edit_section_html += `
-            <option value="${course_object["courseID"]}" ${is_current_course ? "disabled" : ""}>
+            <option value="${course_object["id"]}" ${is_current_course ? "disabled" : ""}>
               ${course_object["course"]}
             </option>
           `;
         }
 
         // Get course ID of course being updated or deleted
-        const course_id = course_objects.find(c => c.course === courses_array[index]).courseID;
+        const course_id = course_objects.find(c => c.course === courses_array[index]).id;
 
         edit_section_html += `
             </select>
@@ -278,7 +252,7 @@
         const is_current_course = courses_array.includes(course_object["course"]);
         
         edit_section_html += `
-          <option value="${course_object["courseID"]}" ${is_current_course ? "disabled" : ""}>
+          <option value="${course_object["id"]}" ${is_current_course ? "disabled" : ""}>
             ${course_object["course"]}
           </option>
         `;
@@ -297,10 +271,6 @@
       toggleStudentTermPlanForm("edit_student_term_plan_courses_section")
     }
 
-    // /////////////////////////////// //
-    // FUNCTION                        //
-    // UPDATE STUDENT TERM PLAN COURSE //
-    // /////////////////////////////// //
     // Handle updating a student term plan course
     async function updateStudentTermPlanCourse(event, student_term_plan_id, course_id, button_element) {
       // Prevent page from refreshing
@@ -348,10 +318,6 @@
       } 
     }
 
-    // //////////////////////////// //
-    // FUNCTION                     //
-    // ADD STUDENT TERM PLAN COURSE //
-    // //////////////////////////// //
     // Handle adding a student term plan course
     async function addStudentTermPlanCourse(event, student_term_plan_id, button_element) {
       // Prevent page from refreshing
@@ -389,123 +355,99 @@
     })
 
   </script>
+{% endblock %}
+{% block header %}Student Term Plans{% endblock %}
+{% block main %}
+  {# View All Term Plans Section #}
+  <section id="view_student_term_plans_section" style="display: block;">
+    <h3>View All Student Term Plans</h3>
+    <button id="add_student_term_plan_button" type="button" onclick="toggleStudentTermPlanForm('add_student_term_plan_section')">Add New Student Term Plan</button>
+    <table border="1">
+      <tr>
+        <th>Plan ID</th>
+        <th>Student ID</th>
+        <th>Student Name</th>
+        <th>Term</th>
+        <th>Courses</th>
+        <th>Advisor Approved</th>
+        <th>Add/Update/Delete Courses</th>
+        <th>Delete Plan</th>
+      </tr>
+      {% for student_term_plan in student_term_plans %}
+      <tr>
+        <td>{{ student_term_plan["studentTermPlanID"] }}</td>
+        <td>{{ student_term_plan["studentID"] }}</td>
+        <td>{{ student_term_plan["studentName"] }}</td>
+        <td>{{ student_term_plan["termName"] }}</td>
+        <td>
+          {% if student_term_plan["courses"] %}
+            {{ student_term_plan["courses"].replace(", ", ", <br>")|safe }}
+          {% else %}
+            None
+          {% endif %}
+        </td>
+        <td>{{ student_term_plan["advisorApproved"] }}</td>
+        <td><button id="edit_student_term_plan_courses_button" type="button" onclick="buildUpdateStudentTermPlanSection(event, {{ student_term_plan['studentTermPlanID'] }}, '{{ student_term_plan['studentName'] }}', '{{ student_term_plan['termName'] }}', '{{ student_term_plan['courses'] }}')">Edit</button></td>
+        <td><button id="edit_student_term_plan_courses_button" type="button" onclick="deleteStudentTermPlan(event, {{ student_term_plan['studentTermPlanID'] }}, this)">Delete</button></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
 
-</head>
+  {# Add New Term Plan Section #}
+  <section id="add_student_term_plan_section" style="display: none;">
+    <h3>Add New Student Term Plan</h3>
+    <form id="add_student_term_plan_form" style="border: 1px solid black; padding: 15px;">
 
-<body>
+      {# Student #}
+      <label for="student_id">Student</label><br>
+      <select name="student_id" id="student_id" aria-label="Student" required>
+        <option value="" disabled selected>Select a student</option>
 
-  <header>
-    <h1>Student Term Plans</h1>
-  </header>
-
-  {# Navigation Bar #}
-  <nav>
-    <ul>
-      <li><a href="/index">Index</a></li>
-      <li><a href="/courses">Courses & Prerequisites</a></li>
-      <li><a href="/terms">Terms</a></li>
-      <li><a href="/student-term-plans">Student Term Plans</a></li>
-      <li><a href="/students">Students</a></li>
-    </ul>
-  </nav>
-
-  <main>
-
-    {# View All Term Plans Section #}
-    <section id="view_student_term_plans_section" style="display: block;">
-      <h3>View All Student Term Plans</h3>
-      <button id="add_student_term_plan_button" type="button" onclick="toggleStudentTermPlanForm('add_student_term_plan_section')">Add New Student Term Plan</button>
-      <table border="1">
-        <tr>
-          <th>Plan ID</th>
-          <th>Student ID</th>
-          <th>Student Name</th>
-          <th>Term</th>
-          <th>Courses</th>
-          <th>Advisor Approved</th>
-          <th>Add/Update/Delete Courses</th>
-          <th>Delete Plan</th>
-        </tr>
-        {% for student_term_plan in student_term_plans %}
-        <tr>
-          <td>{{ student_term_plan["studentTermPlanID"] }}</td>
-          <td>{{ student_term_plan["studentID"] }}</td>
-          <td>{{ student_term_plan["studentName"] }}</td>
-          <td>{{ student_term_plan["termName"] }}</td>
-          <td>
-            {% if student_term_plan["courses"] %}
-              {{ student_term_plan["courses"].replace(", ", ", <br>")|safe }}
-            {% else %}
-              None
-            {% endif %}
-          </td>
-          <td>{{ student_term_plan["advisorApproved"] }}</td>
-          <td><button id="edit_student_term_plan_courses_button" type="button" onclick="buildUpdateStudentTermPlanSection(event, {{ student_term_plan['studentTermPlanID'] }}, '{{ student_term_plan['studentName'] }}', '{{ student_term_plan['termName'] }}', '{{ student_term_plan['courses'] }}')">Edit</button></td>
-          <td><button id="edit_student_term_plan_courses_button" type="button" onclick="deleteStudentTermPlan(event, {{ student_term_plan['studentTermPlanID'] }}, this)">Delete</button></td>
-        </tr>
-        {% endfor %}
-      </table>
-    </section>
-
-    {# Add New Term Plan Section #}
-    <section id="add_student_term_plan_section" style="display: none;">
-      <h3>Add New Student Term Plan</h3>
-      <form id="add_student_term_plan_form" style="border: 1px solid black; padding: 15px;">
-
-        {# Student #}
-        <label for="student_id">Student</label><br>
-        <select name="student_id" id="student_id" aria-label="Student" required>
-          <option value="" disabled selected>Select a student</option>
-
-          {% for student in students %}
-          <option value={{ student["studentID"] }}>{{ student["student"] }}</option>
-          {% endfor %}
-
-        </select><br>
-
-        {# Term #}
-        <label for="term_id">Term</label><br>
-        <select name="term_id" id="term_id" aria-label="Term" required>
-          <option value="" disabled selected>Select a term</option>
-
-          {% for term in terms %}
-          <option value={{ term["termID"] }}>{{ term["name"] }}</option>
-          {% endfor %}
-
-        </select><br>
-
-        {# Advisor Approved #}
-        <p>Advisor Approved</p>
-        <label>
-          <input type="radio" name="advisor_approved" value=1>Yes
-        </label><br>
-        <label>
-          <input type="radio" name="advisor_approved" value=0>No
-        </label><br>
-
-        {# Courses #}
-        <p>Courses</p>
-        {% for course in courses %}
-        <label>
-          <input type="checkbox" name="courses" value={{ course["courseID"] }}> {{ course["course"]
-          }}
-        </label><br>
+        {% for student in students %}
+        <option value={{ student["studentID"] }}>{{ student["student"] }}</option>
         {% endfor %}
 
-        {# Submit and Cancel Buttons #}
-        <button id="submit_add_student_term_plan_button" type="submit">Submit</button><br>
-        <button id="cancel_add_student_term_plan_button" type="button" onclick="toggleStudentTermPlanForm('view_student_term_plans_section')">Cancel</button>
-      </form>
-    </section>
+      </select><br>
+
+      {# Term #}
+      <label for="term_id">Term</label><br>
+      <select name="term_id" id="term_id" aria-label="Term" required>
+        <option value="" disabled selected>Select a term</option>
+
+        {% for term in terms %}
+        <option value={{ term["id"] }}>{{ term["name"] }}</option>
+        {% endfor %}
+
+      </select><br>
+
+      {# Advisor Approved #}
+      <p>Advisor Approved</p>
+      <label>
+        <input type="radio" name="advisor_approved" value=1>Yes
+      </label><br>
+      <label>
+        <input type="radio" name="advisor_approved" value=0>No
+      </label><br>
+
+      {# Courses #}
+      <p>Courses</p>
+      {% for course in courses %}
+      <label>
+        <input type="checkbox" name="courses" value={{ course["id"] }}> {{ course["course"]
+        }}
+      </label><br>
+      {% endfor %}
+
+      {# Submit and Cancel Buttons #}
+      <button id="submit_add_student_term_plan_button" type="submit">Submit</button><br>
+      <button id="cancel_add_student_term_plan_button" type="button" onclick="toggleStudentTermPlanForm('view_student_term_plans_section')">Cancel</button>
+    </form>
+  </section>
 
 
-    {# Update or Delete Student's Courses in Student Term Plan #}
-    <section id="edit_student_term_plan_courses_section" style="display: none;">
-      {# Section constructed via JS function #}
-    </section>
-
-  </main>
-
-</body>
-
-</html>
+  {# Update or Delete Student's Courses in Student Term Plan #}
+  <section id="edit_student_term_plan_courses_section" style="display: none;">
+    {# Section constructed via JS function #}
+  </section>
+{% endblock %}

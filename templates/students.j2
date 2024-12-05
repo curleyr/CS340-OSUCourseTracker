@@ -1,18 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Students</title>
-
-  {# Favicon #}
-  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" />
-  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='icons/favicon-32x32.png') }}" />
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='icons/favicon-16x16.png') }}" />
-  <link rel="manifest" href="{{ url_for('static', filename='icons/site.webmanifest') }}" />
-
+{% extends "base.j2" %}
+{% block title %}Students{% endblock %}
+{% block script %}
   <script>
     // /////////// //
     // FUNCTION    //
@@ -132,83 +120,56 @@
     document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("add_student_form").onsubmit = addStudent;
     })
-
   </script>
+{% endblock %}
+{% block header %}Students{% endblock %}
+{% block main %}
+  {# View All Students Section #}
+  <section id="view_students_section" style="display: block;">
+    <h3>View All Students</h3>
+    <button ID="add_student_button" type="button" onclick="toggleStudentForm('add_student_section')">Add New
+      Student</button>
+    <table border="1">
+      <tr>
+        <th>OSU ID Number</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Edit</th>
+        <th>Delete</th>
+      </tr>
+      {% for student in students %}
+      <tr>
+        <td>{{ student["id"] }}</td>
+        <td>{{ student["firstName"] }}</td>
+        <td>{{ student["lastName"] }}</td>
+        <td><a href="edit-student/{{ student['id'] }}"><button id="edit_student_button"
+              type="button">Edit</button></a></td>
+        <td><button id="delete_student_button" type="button"
+            onclick="deleteStudent(event, '{{ student['id'] }}', this)">Delete</button></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
 
-</head>
+  {# Add New Student Section #}
+  <section id="add_student_section" style="display: none;">
+    <h3>Add New Student</h3>
+    <form id="add_student_form" style="border: 1px solid black; padding: 15px;">
+      {# Student OSU ID Number #}
+      <label for="student_id">OSU ID Number:</label>
+      <input type="text" inputmode="numeric" name="student_id" id="student_id" aria-label="Student OSU ID Number"
+        required> <br>
+      {# Student First Name #}
+      <label for="first_name">First Name</label>
+      <input type="text" name="first_name" id="first_name" aria-label="Student First Name" required> <br>
+      {# Student Last Name #}
+      <label for="last_name">Last Name</label>
+      <input type="text" name="last_name" id="last_name" aria-label="Student Last Name" required> <br>
 
-
-<body>
-
-  <header>
-    <h1>Students</h1>
-  </header>
-
-  {# Navigation Bar #}
-  <nav>
-    <ul>
-      <li><a href="/index">Index</a></li>
-      <li><a href="/courses">Courses & Prerequisites</a></li>
-      <li><a href="/terms">Terms</a></li>
-      <li><a href="/student-term-plans">Student Term Plans</a></li>
-      <li><a href="/students">Students</a></li>
-    </ul>
-  </nav>
-
-  <main>
-
-    {# View All Students Section #}
-    <section id="view_students_section" style="display: block;">
-      <h3>View All Students</h3>
-      <button ID="add_student_button" type="button" onclick="toggleStudentForm('add_student_section')">Add New
-        Student</button>
-      <table border="1">
-        <tr>
-          <th>OSU ID Number</th>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>Edit</th>
-          <th>Delete</th>
-        </tr>
-        {% for student in students %}
-        <tr>
-          <td>{{ student["id"] }}</td>
-          <td>{{ student["firstName"] }}</td>
-          <td>{{ student["lastName"] }}</td>
-          <td><a href="edit-student/{{ student['id'] }}"><button id="edit_student_button"
-                type="button">Edit</button></a></td>
-          <td><button id="delete_student_button" type="button"
-              onclick="deleteStudent(event, '{{ student['id'] }}', this)">Delete</button></td>
-        </tr>
-        {% endfor %}
-      </table>
-    </section>
-
-    {# Add New Student Section #}
-    <section id="add_student_section" style="display: none;">
-      <h3>Add New Student</h3>
-      <form id="add_student_form" style="border: 1px solid black; padding: 15px;">
-        {# Student OSU ID Number #}
-        <label for="student_id">OSU ID Number:</label>
-        <input type="text" inputmode="numeric" name="student_id" id="student_id" aria-label="Student OSU ID Number"
-          required> <br>
-        {# Student First Name #}
-        <label for="first_name">First Name</label>
-        <input type="text" name="first_name" id="first_name" aria-label="Student First Name" required> <br>
-        {# Student Last Name #}
-        <label for="last_name">Last Name</label>
-        <input type="text" name="last_name" id="last_name" aria-label="Student Last Name" required> <br>
-
-        {# Submit and Cancel Buttons #}
-        <button id="submit_add_student_button" type="submit">Submit</button><br>
-        <button id="cancel_add_student_button" type="button"
-          onclick="toggleStudentForm('view_students_section')">Cancel</button>
-      </form>
-    </section>
-
-
-  </main>
-
-</body>
-
-</html>
+      {# Submit and Cancel Buttons #}
+      <button id="submit_add_student_button" type="submit">Submit</button><br>
+      <button id="cancel_add_student_button" type="button"
+        onclick="toggleStudentForm('view_students_section')">Cancel</button>
+    </form>
+  </section>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.j2" %}
+{% block title %}Error{% endblock %}
+{% block header %}Oops! An error has occurred.{% endblock %}
+{% block main %}
+  <section>
+    <h3>Name: {{ error_name }}</h3>
+    <p>Description: {{ error_description }}</p>
+  </section>
+{% endblock %}
