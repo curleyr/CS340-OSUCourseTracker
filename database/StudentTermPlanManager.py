@@ -208,6 +208,31 @@ class StudentTermPlanManager:
     
     self.perform_query(query=query, parameters=(new_course_id, student_term_plan_id, course_id), method="commit")
 
+  def update_approval(self, student_term_plan_id: int, advisor_approved: int) -> None:
+    """
+    Updates a student term plan advisor approved status
+
+    Arguments:
+      - student_term_plan_id (int): Student term plan ID
+      - advisor_approved (int): Advisor approval status; 1 if approved else 0
+
+    Returns:
+      - None
+
+    Raises:
+      QueryError: If an error occurs during the query execution.
+    """
+
+    self._database_manager.check_connection()
+
+    query = """
+      UPDATE StudentTermPlans
+      SET advisorApproved = %s
+      WHERE studentTermPlanID = %s
+    """
+    
+    self.perform_query(query=query, parameters=(advisor_approved, student_term_plan_id), method="commit")
+
   def remove_course(self, student_term_plan_id: int, course_id: int) -> None:
     """
     Removes a course from a student term plan

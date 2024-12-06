@@ -349,6 +349,38 @@
       } 
     }
 
+    // Handle updating advisor approval of a plan
+    async function updateAdvisorApproval(event, form) {
+      // Prevent page from refreshing
+      event.preventDefault();
+
+      // Get values from the form
+      const student_term_plan_id = parseInt(form.querySelector("#student_term_plan_id").value, 10);
+      const advisor_approved = parseInt(form.querySelector('input[name="advisor_approved"]:checked').value, 10);
+
+      // Call Flask route to update approval status
+      const response = await fetch(
+        "/update-student-term-plan-advisor-approval", {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          method: "PATCH",
+          body: JSON.stringify({"student_term_plan_id": student_term_plan_id, "advisor_approved": advisor_approved})
+        }
+      )
+    
+      const message = await response.json();
+      console.log(JSON.stringify(message));
+
+      // Display confirmation/error popup on screen
+      window.alert(message["message"].replace('"', ''));
+
+      // Refresh page on Unuccessful Response to set back radio button
+      if (response.status != 200) {
+        toggleStudentTermPlanForm("view_student_term_plans_section", refresh=true)
+      } 
+    }
+
     // Add listeners
     document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("add_student_term_plan_form").onsubmit = addStudentTermPlan
@@ -386,7 +418,20 @@
             None
           {% endif %}
         </td>
-        <td>{{ student_term_plan["advisorApproved"] }}</td>
+        {#<td>{{ student_term_plan["advisorApproved"] }}</td>#}
+        
+        <td>
+          <form>
+            <input type="hidden" value="{{ student_term_plan['studentTermPlanID'] }}" id="student_term_plan_id" name="student_term_plan_id">
+            <label>
+              <input type="radio" name="advisor_approved" value=1 {{ "checked" if student_term_plan["advisorApproved"] == "Yes" else "" }} onchange="updateAdvisorApproval(event, this.form)">Yes
+            </label><br>
+            <label>
+              <input type="radio" name="advisor_approved" value=0 {{ "checked" if student_term_plan["advisorApproved"] == "No" else "" }} onchange="updateAdvisorApproval(event, this.form)">No
+            </label>
+          </form>
+        </td>
+        
         <td><button id="edit_student_term_plan_courses_button" type="button" onclick="buildUpdateStudentTermPlanSection(event, {{ student_term_plan['studentTermPlanID'] }}, '{{ student_term_plan['studentName'] }}', '{{ student_term_plan['termName'] }}', '{{ student_term_plan['courses'] }}')">Edit</button></td>
         <td><button id="edit_student_term_plan_courses_button" type="button" onclick="deleteStudentTermPlan(event, {{ student_term_plan['studentTermPlanID'] }}, this)">Delete</button></td>
       </tr>
