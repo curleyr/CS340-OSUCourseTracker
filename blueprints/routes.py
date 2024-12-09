@@ -136,6 +136,16 @@ def editStudentTermPlan():
 
   return jsonify(message = f"The course has been {'updated' if action == ACTION_UPDATE else 'added'}."), 200
 
+# Define constant for advisor approval status
+ADVISOR_APPROVED = 1
+@routes_blueprint.route("/update-student-term-plan-advisor-approval", methods=["PATCH"])
+def updateAdvisorApproval():
+  # Get posted form data
+  student_term_plan_id, advisor_approved = itemgetter("student_term_plan_id", "advisor_approved")(request.get_json())
+  
+  qm._studentTermPlans.update_approval(student_term_plan_id, advisor_approved)
+  return jsonify(message = f"The student term plan approval status has been updated to {'approved' if advisor_approved == ADVISOR_APPROVED else 'not approved'}."), 200
+
 @routes_blueprint.route("/delete-student-term-plan/<int:student_term_plan_id>", methods=["DELETE"])
 def deleteStudentTermPlan(student_term_plan_id):
   qm._studentTermPlans.delete(student_term_plan_id)
