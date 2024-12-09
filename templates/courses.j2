@@ -1,154 +1,159 @@
 {% extends "base.j2" %}
 {% block title %}Courses{% endblock %}
 {% block script %}
-  <script>
-    // //////// //
-    // FUNCTION //
-    // //////// //
-    // Handle toggling page from viewing courses to adding a course and back
-    function toggleCourseForm(section_to_display, reload=false) {
-      if(reload) {
-        location.reload()
-        return
-      }
-
-      const sections = [
-        "view_courses_section", 
-        "add_course_section"
-      ]
-
-      for (const section of sections) {
-        if (section === section_to_display) {
-          document.getElementById(section).style.display = "block"
-        } else {
-          document.getElementById(section).style.display = "none"
-        }
-      }
+<script>
+  // //////// //
+  // FUNCTION //
+  // //////// //
+  // Handle toggling page from viewing courses to adding a course and back
+  function toggleCourseForm(section_to_display, reload = false) {
+    if (reload) {
+      location.reload()
+      return
     }
 
-    // //////// //
-    // FUNCTION //
-    // //////// //
-    // Handle add new course form submission
-    async function addCourse(event) {
-      // Prevent page from refreshing
-      event.preventDefault();
+    const sections = [
+      "view_courses_section",
+      "add_course_section"
+    ]
 
-      // Instantiate FormData object
-      const formData = new FormData(event.target);
-      // Initialize data object. This will be built below
-      const data = {};
-
-      // Iterate through each key value pair from formData
-      formData.forEach((value, key) => {
-        // Course ID array needs to be constructed
-        if (key === "prerequisite_course_ids") {
-          // Create empty prerequisite_course_ids array if not already included in data object
-          if (!data[key]) {
-            data[key] = [];
-          }
-          // Push course ID to prerequisite_course_ids array
-          data[key].push(value);
-
-          // All non-course keys can be pushed directly as separate data object properties
-        } else {
-          data[key] = value;
-        }
-      })
-
-      // Logging to console for debugging purposes
-      console.log(data);
-
-      // Call Flask route to add course and prerequisites
-      const response = await fetch(
-        "/add-course", {
-          headers: {
-            "Content-Type": "application/json"
-          },
-          method: "POST",
-          body: JSON.stringify(data)
-        }
-      )
-
-      const message = await response.json();
-      console.log(JSON.stringify(message));
-
-      // Display confirmation/error popup on screen
-      window.alert(message["message"].replace('"', ''));
-
-      // Successful Response
-      if (response.status == 200) {
-        toggleCourseForm("view_courses_section", reload=true)
-      } 
+    for (const section of sections) {
+      if (section === section_to_display) {
+        document.getElementById(section).style.display = "block"
+      } else {
+        document.getElementById(section).style.display = "none"
+      }
     }
+  }
 
-    // Add listeners
-    document.addEventListener("DOMContentLoaded", function () {
-      document.getElementById("add_course_form").onsubmit = addCourse;
+  // //////// //
+  // FUNCTION //
+  // //////// //
+  // Handle add new course form submission
+  async function addCourse(event) {
+    // Prevent page from refreshing
+    event.preventDefault();
+
+    // Instantiate FormData object
+    const formData = new FormData(event.target);
+    // Initialize data object. This will be built below
+    const data = {};
+
+    // Iterate through each key value pair from formData
+    formData.forEach((value, key) => {
+      // Course ID array needs to be constructed
+      if (key === "prerequisite_course_ids") {
+        // Create empty prerequisite_course_ids array if not already included in data object
+        if (!data[key]) {
+          data[key] = [];
+        }
+        // Push course ID to prerequisite_course_ids array
+        data[key].push(value);
+
+        // All non-course keys can be pushed directly as separate data object properties
+      } else {
+        data[key] = value;
+      }
     })
-  </script>
+
+    // Logging to console for debugging purposes
+    console.log(data);
+
+    // Call Flask route to add course and prerequisites
+    const response = await fetch(
+      "/add-course", {
+      headers: {
+        "Content-Type": "application/json"
+      },
+      method: "POST",
+      body: JSON.stringify(data)
+    }
+    )
+
+    const message = await response.json();
+    console.log(JSON.stringify(message));
+
+    // Display confirmation/error popup on screen
+    window.alert(message["message"].replace('"', ''));
+
+    // Successful Response
+    if (response.status == 200) {
+      toggleCourseForm("view_courses_section", reload = true)
+    }
+  }
+
+  // Add listeners
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("add_course_form").onsubmit = addCourse;
+  })
+</script>
 {% endblock %}
 {% block header %}Courses{% endblock %}
 {% block main %}
-  {# View All Course Section #}
-  <section id="view_courses_section" style="display: block;">
-    <h3>View All Courses & Prerequisites</h3>
-    <button id="add_course_button" type="button" onclick="toggleCourseForm('add_course_section')">Add New Course</button>
-    <table border="1">
-      <tr>
-        <th>ID</th>
-        <th>Course</th>
-        <th>Credit</th>
-        <th>Prerequisites</th>
-      </tr>
-      {% for course in courses %}
-      <tr>
-        <td>{{ course["id"] }}</td>
-        <td>{{ course["course"] }}</td>
-        <td>{{ course["credit"] }}</td>
-        <td>
-          {% if course["prerequisites"] %}
-            {{ course["prerequisites"].replace(', ', ', <br>')|safe }}
-          {% else %}
-            None
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </table>
-  </section>
+{# View All Course Section #}
+<section id="view_courses_section" style="display: block;">
+  <h3>View All Courses & Prerequisites</h3>
+  <button id="add_course_button" type="button" class="button--call-to-action"
+    onclick="toggleCourseForm('add_course_section')">Add New Course</button>
+  <br> <br>
+  <table border="1">
+    <tr>
+      <th>ID</th>
+      <th>Course</th>
+      <th>Credit</th>
+      <th>Prerequisites</th>
+    </tr>
+    {% for course in courses %}
+    <tr>
+      <td>{{ course["id"] }}</td>
+      <td>{{ course["course"] }}</td>
+      <td>{{ course["credit"] }}</td>
+      <td>
+        {% if course["prerequisites"] %}
+        {{ course["prerequisites"].replace(', ', ', <br>')|safe }}
+        {% else %}
+        None
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</section>
 
-  {# Add New Course Section #}
-  <section id="add_course_section" style="display: none;">
-    <h3>Add New Course</h3>
-    <form id="add_course_form" style="border: 1px solid black; padding: 15px;">
-      {# Course Code #}
-      <label for="course_code">Code</label><br>
-      <input type="text" id="course_code" name="course_code" aria-label="Code" required /><br>
+{# Add New Course Section #}
+<section id="add_course_section" style="display: none;">
+  <h3>Add New Course</h3>
+  <form id="add_course_form" style="border: 1px solid black; padding: 15px;">
+    {# Course Code #}
+    <label for="course_code">Code</label><br>
+    <input type="text" id="course_code" name="course_code" aria-label="Code" required /><br>
 
-      <label for="course_name">Name</label><br>
-      <input type="text" id="course_name" name="course_name" aria-label="Name" required /><br>
+    <label for="course_name">Name</label><br>
+    <input type="text" id="course_name" name="course_name" aria-label="Name" required /><br>
 
-      <label for="course_credit">Credit</label><br>
-      <select name="course_credit" id="course_credit" aria-label="Credit" required>
-        <option value="" disabled selected>Select credit</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-      </select><br>
+    <label for="course_credit">Credit</label><br>
+    <select name="course_credit" id="course_credit" aria-label="Credit" required>
+      <option value="" disabled selected>Select credit</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+    </select><br>
 
-      {# Prerequisites #}
-      <p>Prerequisites</p>
-      {% for course in courses %}
-      <label>
-        <input type="checkbox" name="prerequisite_course_ids" value={{ course["id"] }}> {{ course["course"] }}
-      </label><br>
-      {% endfor %}
+    {# Prerequisites #}
+    <p>Prerequisites</p>
+    {% for course in courses %}
+    <label>
+      <input type="checkbox" name="prerequisite_course_ids" value={{ course["id"] }}> {{ course["course"] }}
+    </label><br>
+    {% endfor %}
 
-      {# Submit and Cancel Buttons #}
-      <button id="submit_add_course_button" type="submit">Submit</button><br>
-      <button id="cancel_add_course_button" type="button" onclick="toggleCourseForm('view_courses_section')">Cancel</button>
-    </form>
-  </section>
+    {# Submit and Cancel Buttons #}
+    <div class="buttons__group">
+      <button id="submit_add_course_button" type="submit" class="button--call-to-action">Submit</button><br>
+      <button id="cancel_add_course_button" type="button"
+        onclick="toggleCourseForm('view_courses_section')">Cancel</button>
+    </div>
+  </form>
+</section>
 {% endblock %}

@@ -1,175 +1,176 @@
-{% extends "base.j2" %}
-{% block title %}Students{% endblock %}
-{% block script %}
-  <script>
-    // /////////// //
-    // FUNCTION    //
-    // PAGE TOGGLE //
-    // /////////// //
-    // Handle toggling page from viewing students to other forms
-    function toggleStudentForm(section_to_display, reload = false) {
-      if (reload) {
-        location.reload()
-        return
-      }
-
-      const sections = [
-        "view_students_section",
-        "add_student_section"
-      ]
-
-      for (const section of sections) {
-        if (section === section_to_display) {
-          document.getElementById(section).style.display = "block"
-        } else {
-          document.getElementById(section).style.display = "none"
-        }
-      }
+{% extends "base.j2" %} {% block title %}Students{% endblock %} {% block script %}
+<script>
+  // /////////// //
+  // FUNCTION    //
+  // PAGE TOGGLE //
+  // /////////// //
+  // Handle toggling page from viewing students to other forms
+  function toggleStudentForm(section_to_display, reload = false) {
+    if (reload) {
+      location.reload()
+      return
     }
 
-    // /////////// //
-    // FUNCTION    //
-    // ADD STUDENT //
-    // /////////// //
-    async function addStudent(event) {
-      // Prevent page from refreshing
-      event.preventDefault();
+    const sections = [
+      "view_students_section",
+      "add_student_section"
+    ]
 
-      // Instantiate FormData object
-      const formData = new FormData(event.target);
-      // Initialize data object. This will be built below
-      const data = {};
-
-      // Iterate through each key value pair from formData
-      formData.forEach((value, key) => {
-        data[key] = value;
-      });
-      // Logging to console for debugging purposes
-      console.log(data);
-
-      // Call Flask route to add student
-      const response = await fetch(
-        "/add-student", {
-        headers: {
-          "Content-Type": "application/json"
-        },
-        method: "POST",
-        body: JSON.stringify(data)
-      }
-      )
-
-      const message = await response.json();
-      console.log(JSON.stringify(message));
-
-      // Display confirmation/error popup on screen
-      window.alert(message["message"].replace('"', ''));
-
-      // Successful Response
-      if (response.status == 200) {
-        toggleStudentForm("view_students_section", reload = true)
+    for (const section of sections) {
+      if (section === section_to_display) {
+        document.getElementById(section).style.display = "block"
+      } else {
+        document.getElementById(section).style.display = "none"
       }
     }
+  }
 
-    // ////////////// //
-    // FUNCTION       //
-    // DELETE STUDENT //
-    // ////////////// //
-    async function deleteStudent(event, student_id, button_element) {
-      // Prevent page from refreshing
-      event.preventDefault();
+  // /////////// //
+  // FUNCTION    //
+  // ADD STUDENT //
+  // /////////// //
+  async function addStudent(event) {
+    // Prevent page from refreshing
+    event.preventDefault();
 
-      console.log(student_id)
+    // Instantiate FormData object
+    const formData = new FormData(event.target);
+    // Initialize data object. This will be built below
+    const data = {};
 
-      // Display a confirmation popup
-      if (!confirm("Are you sure you want to delete this student?")) {
-        return
-      }
+    // Iterate through each key value pair from formData
+    formData.forEach((value, key) => {
+      data[key] = value;
+    });
+    // Logging to console for debugging purposes
+    console.log(data);
 
-      // Call Flask route to delete student
-      const response = await fetch(
-        "/delete-student", {
-        headers: {
-          "Content-Type": "application/json"
-        },
-        method: "DELETE",
-        body: JSON.stringify({ "student_id": student_id })
-      }
-      )
+    // Call Flask route to add student
+    const response = await fetch(
+      "/add-student", {
+      headers: {
+        "Content-Type": "application/json"
+      },
+      method: "POST",
+      body: JSON.stringify(data)
+    }
+    )
 
-      const message = await response.json();
-      console.log(JSON.stringify(message));
+    const message = await response.json();
+    console.log(JSON.stringify(message));
 
-      // Display confirmation/error popup on screen
-      window.alert(message["message"].replace('"', ''));
+    // Display confirmation/error popup on screen
+    window.alert(message["message"].replace('"', ''));
 
-      // Successful Response
-      if (response.status == 200) {
+    // Successful Response
+    if (response.status == 200) {
+      toggleStudentForm("view_students_section", reload = true)
+    }
+  }
 
-        // Get the parent <tr> element and remove it after term plan has been deleted
-        const tr_element = button_element.closest("tr");
-        if (tr_element) {
-          tr_element.remove()
-        } else {
-          console.error("Couldn't remove the table row")
-        }
-      }
+  // ////////////// //
+  // FUNCTION       //
+  // DELETE STUDENT //
+  // ////////////// //
+  async function deleteStudent(event, student_id, button_element) {
+    // Prevent page from refreshing
+    event.preventDefault();
+
+    console.log(student_id)
+
+    // Display a confirmation popup
+    if (!confirm("Are you sure you want to delete this student?")) {
+      return
     }
 
+    // Call Flask route to delete student
+    const response = await fetch(
+      "/delete-student", {
+      headers: {
+        "Content-Type": "application/json"
+      },
+      method: "DELETE",
+      body: JSON.stringify({ "student_id": student_id })
+    }
+    )
 
-    // Add listeners
-    document.addEventListener("DOMContentLoaded", function () {
-      document.getElementById("add_student_form").onsubmit = addStudent;
-    })
-  </script>
+    const message = await response.json();
+    console.log(JSON.stringify(message));
+
+    // Display confirmation/error popup on screen
+    window.alert(message["message"].replace('"', ''));
+
+    // Successful Response
+    if (response.status == 200) {
+
+      // Get the parent <tr> element and remove it after term plan has been deleted
+      const tr_element = button_element.closest("tr");
+      if (tr_element) {
+        tr_element.remove()
+      } else {
+        console.error("Couldn't remove the table row")
+      }
+    }
+  }
+
+
+  // Add listeners
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("add_student_form").onsubmit = addStudent;
+  })
+</script>
 {% endblock %}
 {% block header %}Students{% endblock %}
 {% block main %}
-  {# View All Students Section #}
-  <section id="view_students_section" style="display: block;">
-    <h3>View All Students</h3>
-    <button ID="add_student_button" type="button" onclick="toggleStudentForm('add_student_section')">Add New
-      Student</button>
-    <table border="1">
-      <tr>
-        <th>OSU ID Number</th>
-        <th>First Name</th>
-        <th>Last Name</th>
-        <th>Edit</th>
-        <th>Delete</th>
-      </tr>
-      {% for student in students %}
-      <tr>
-        <td>{{ student["id"] }}</td>
-        <td>{{ student["firstName"] }}</td>
-        <td>{{ student["lastName"] }}</td>
-        <td><a href="edit-student/{{ student['id'] }}"><button id="edit_student_button"
-              type="button">Edit</button></a></td>
-        <td><button id="delete_student_button" type="button"
-            onclick="deleteStudent(event, '{{ student['id'] }}', this)">Delete</button></td>
-      </tr>
-      {% endfor %}
-    </table>
-  </section>
+{# View All Students Section #}
+<section id="view_students_section" style="display: block;">
+  <h3>View All Students</h3>
+  <button ID="add_student_button" type="button" class="button--call-to-action"
+    onclick="toggleStudentForm('add_student_section')">Add New
+    Student</button> <br> <br>
+  <table border="1">
+    <tr>
+      <th>OSU ID Number</th>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Edit</th>
+      <th>Delete</th>
+    </tr>
+    {% for student in students %}
+    <tr>
+      <td>{{ student["id"] }}</td>
+      <td>{{ student["firstName"] }}</td>
+      <td>{{ student["lastName"] }}</td>
+      <td><a href="edit-student/{{ student['id'] }}"><button id="edit_student_button" type="button">Edit</button></a>
+      </td>
+      <td><button id="delete_student_button" type="button"
+          onclick="deleteStudent(event, '{{ student['id'] }}', this)">Delete</button></td>
+    </tr>
+    {% endfor %}
+  </table>
+</section>
 
-  {# Add New Student Section #}
-  <section id="add_student_section" style="display: none;">
-    <h3>Add New Student</h3>
-    <form id="add_student_form" style="border: 1px solid black; padding: 15px;">
-      {# Student OSU ID Number #}
-      <label for="student_id">OSU ID Number:</label>
-      <input type="text" inputmode="numeric" name="student_id" id="student_id" aria-label="Student OSU ID Number"
-        required> <br>
-      {# Student First Name #}
-      <label for="first_name">First Name</label>
-      <input type="text" name="first_name" id="first_name" aria-label="Student First Name" required> <br>
-      {# Student Last Name #}
-      <label for="last_name">Last Name</label>
-      <input type="text" name="last_name" id="last_name" aria-label="Student Last Name" required> <br>
+{# Add New Student Section #}
+<section id="add_student_section" style="display: none;">
+  <h3>Add New Student</h3>
+  <form id="add_student_form" style="border: 1px solid black; padding: 15px;">
+    {# Student OSU ID Number #}
+    <label for="student_id">OSU ID Number:</label>
+    <input type="text" inputmode="numeric" name="student_id" id="student_id" aria-label="Student OSU ID Number"
+      required> <br>
+    {# Student First Name #}
+    <label for="first_name">First Name</label>
+    <input type="text" name="first_name" id="first_name" aria-label="Student First Name" required> <br>
+    {# Student Last Name #}
+    <label for="last_name">Last Name</label>
+    <input type="text" name="last_name" id="last_name" aria-label="Student Last Name" required> <br>
 
-      {# Submit and Cancel Buttons #}
-      <button id="submit_add_student_button" type="submit">Submit</button><br>
+    {# Submit and Cancel Buttons #}
+    <div class="buttons__group">
+      <button id="submit_add_student_button" type="submit" class="button--call-to-action">Submit</button><br>
       <button id="cancel_add_student_button" type="button"
         onclick="toggleStudentForm('view_students_section')">Cancel</button>
-    </form>
-  </section>
+    </div>
+  </form>
+</section>
 {% endblock %}

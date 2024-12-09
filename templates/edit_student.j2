@@ -2,26 +2,31 @@
 {% block title %}Students{% endblock %}
 {% block header %}Students{% endblock %}
 {% block main %}
-  {# Update/Edit Student Section #}
-  <section id="edit_student_section">
+{# Update/Edit Student Section #}
+<section id="edit_student_section">
     <h3>Edit Student Information</h3>
-    <form id="edit_student_form" action="/edit-student/{{ student['id'] }}" method="post" style="border: 1px solid black; padding: 15px;">
-      {# Hidden form input for id for easy POST access #}
-      <input type="hidden" value="{{student['id']}}" id="studentID" name="studentID">
+    <form id="edit_student_form" action="/edit-student/{{ student['id'] }}" method="post"
+        style="border: 1px solid black; padding: 15px;">
+        {# Hidden form input for id for easy POST access #}
+        <input type="hidden" value="{{student['id']}}" id="studentID" name="studentID">
 
-      {# Student First Name #}
-      <label for="first_name">First Name</label>
-      <input type="text" name="first_name" id="first_name" aria-label="Student First Name" required value="{{student['firstName']}}">
-      <br>
-      
-      {# Student Last Name #}
-      <label for="last_name">Last Name</label>
-      <input type="text" name="last_name" id="last_name" aria-label="Student Last Name" required value="{{student['lastName']}}">
-      <br>
+        {# Student First Name #}
+        <label for="first_name">First Name</label>
+        <input type="text" name="first_name" id="first_name" aria-label="Student First Name" required
+            value="{{student['firstName']}}">
+        <br>
 
-      {# Submit and Cancel Buttons #}
-      <input type="submit" value="Edit Student" name="edit_student" style="margin:0.5rem;"><br>
-      <a href="/students"><button id="cancel_edit_student_button" type="button">Cancel</button></a>
+        {# Student Last Name #}
+        <label for="last_name">Last Name</label>
+        <input type="text" name="last_name" id="last_name" aria-label="Student Last Name" required
+            value="{{student['lastName']}}">
+        <br>
+
+        {# Submit and Cancel Buttons #}
+        <div class="buttons__group">
+            <input type="submit" value="Edit Student" name="edit_student" class="button button--call-to-action"><br>
+            <a href="/students"><button id="cancel_edit_student_button" type="button">Cancel</button></a>
+        </div>
     </form>
-  </section>
+</section>
 {% endblock %}
