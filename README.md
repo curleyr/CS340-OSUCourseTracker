@@ -1,4 +1,20 @@
 # CS340-OSUCourseTracker
+## Project Overview
+- MyOSUPlanner is a web-based application designed for Oregon State University (OSU) to help track and manage student course plans across multiple terms, or semesters. Driven by a relational database backend, this application tracks courses students plan to take during specific terms, while ensuring each student course plan meets both course prerequisite requirements and course availability.
+- The current MyDegrees Planner tool offered via BeaverHub does not check prerequisites or course offering conditions, which means advisors need to manually check for conflicts whenever plans are updated.
+- Our goal is to not only help efficiently track students’ course roadmap, but also alleviate the review process for advisors, as the tool will enforce both prerequisite requirements and course availability conditions.
+
+## Course Project Key Requirements
+- Created by a team of two students
+- Database should have at least 4 entities and at least 4 relationships, one of which must be a many-to-many relationship.
+- Primary user is the administrator of the database
+- Functionality requirements:
+    - It should be possible to INSERT entries into every table individually.
+    - Every table should be used in at least one SELECT query.
+    - CRUD needs to be implemented for at least one entity and one intersection table.
+        - Deleting from a M:M relationship shouldn't create data anomalies in related tables.
+    - Website needs to dynamically populate drop-downs/inputs rather than manually entering foreign key IDs
+    - One relationship must be NULLable using UPDATE to remove the relationship
 ## Database Schema
 ![schema](https://github.com/user-attachments/assets/5b640c39-7e74-49a2-adf2-5c8c3af98cf4)
 
