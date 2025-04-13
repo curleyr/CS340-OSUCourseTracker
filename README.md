@@ -1,5 +1,30 @@
 # CS340-OSUCourseTracker
+## Database Schema
+![schema](https://github.com/user-attachments/assets/5b640c39-7e74-49a2-adf2-5c8c3af98cf4)
 
+## UI Screenshots
+- Pages are dynamically generated based on the database contents
+- Dropdown, input, checkbox, and radio button values are dynamically generated based on database contents
+- The screenshots below are non-exhaustive and do not show every UI or form.
+### Courses & Courses_has_Prerequisites
+![READ Courses](https://github.com/user-attachments/assets/e2d498ae-aec6-45c3-85d5-7f9c4bc1d742)
+![CREATE Courses](https://github.com/user-attachments/assets/d7ad4386-935a-4f90-9ed7-636f190a6424)
+### Terms & Terms_has_Courses
+![READ Terms](https://github.com/user-attachments/assets/87550fe0-e6c4-452d-9136-866cd7fce3d7)
+![CREAT Terms](https://github.com/user-attachments/assets/1f36e4da-8f7c-4c32-9f4b-d17920517af9)
+#### CREATE Terms_has_Courses
+![CREATE Terms has courses](https://github.com/user-attachments/assets/bfe8d2ea-801a-4b4a-86e3-971e6d59f077)
+### StudentTermPlans & StudentTermPlans_has_Courses
+![READ Student Term Plans](https://github.com/user-attachments/assets/f5b46e60-3115-4a2e-8235-ea7183d0bac2)
+![CREATE Student Term Plans](https://github.com/user-attachments/assets/bb6c90da-a41a-42a0-a96b-13e3ea2f4cec)
+#### CREATE/UPDATE/DELETE StudentTermPlans_has_Courses
+- Note, this updates and deletes a many to many relationship
+
+![CUD Studenttermplans has courses](https://github.com/user-attachments/assets/ada40730-02f3-47c9-9019-d282faf22355)
+### Students
+![READ Students](https://github.com/user-attachments/assets/26ebdbd7-cf99-4be6-8307-471d64cbd7c2)
+
+# Local Dev Environment Setup Instructions
 ## Clone Repo
 - Navigate to directory on computer where you want the repo
 - In terminal enter the following
